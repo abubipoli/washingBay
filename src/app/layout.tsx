@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-// Times New Roman is a system font on every platform this app targets, so
-// no next/font/Google Fonts loading is needed for body text — only the
-// Material Symbols icon font below still comes from Google Fonts.
+// next/font self-hosts Inter at build time (no runtime request to Google
+// Fonts, no layout-shift flash) and exposes it as a CSS variable consumed
+// by tailwind.config.ts's fontFamily entries.
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "First Class Washing Bay — Management System",
@@ -24,7 +31,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
         {/* Material Symbols is an icon font, not a text typeface, so it's
             loaded directly rather than through next/font. */}

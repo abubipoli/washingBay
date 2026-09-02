@@ -4,10 +4,16 @@
 
 @layer base {
   html {
+    font-size: 16px;
     -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%; /* prevents iOS Safari auto-inflating text on rotate/zoom */
   }
   body {
-    @apply bg-background text-on-background antialiased;
+    /* bg-background/text-on-background are this project's own design-system
+       tokens (see DESIGN.md) — used here instead of a generic slate-900 so
+       body text stays consistent with every other color reference in the
+       app rather than introducing a second, parallel color system. */
+    @apply font-sans text-base bg-background text-on-background antialiased;
   }
 }
 

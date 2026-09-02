@@ -5,6 +5,7 @@ import { StaffManager } from "@/components/settings/StaffManager";
 import { ServiceTypeManager } from "@/components/settings/ServiceTypeManager";
 import { BusinessSettingsForm } from "@/components/settings/BusinessSettingsForm";
 import { SmsSettingsForm } from "@/components/settings/SmsSettingsForm";
+import { CustomerManager } from "@/components/settings/CustomerManager";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,11 @@ export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
   const isOwner = session?.user.role === "OWNER";
 
-  const [staff, serviceTypes, settings] = await Promise.all([
+  const [staff, serviceTypes, settings, customers] = await Promise.all([
     prisma.staff.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }] }),
     prisma.serviceType.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
     prisma.businessSettings.upsert({ where: { id: "default" }, update: {}, create: { id: "default" } }),
+    prisma.customer.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }] }),
   ]);
 
   const currency = settings.currency;
@@ -25,7 +27,7 @@ export default async function SettingsPage() {
       <div>
         <h2 className="text-display-lg font-display-lg text-on-surface">Settings</h2>
         <p className="text-on-surface-variant mt-1">
-          Manage your washing boys, service pricing, and SMS notifications.
+          Manage your washing boys, service pricing, SMS notifications, and customers.
         </p>
       </div>
 
@@ -65,6 +67,10 @@ export default async function SettingsPage() {
           payoutSmsTemplate: settings.payoutSmsTemplate,
         }}
         isOwner={isOwner}
+      />
+
+      <CustomerManager
+        customers={customers.map((c) => ({ id: c.id, name: c.name, phone: c.phone, notes: c.notes, active: c.active }))}
       />
     </div>
   );

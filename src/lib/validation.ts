@@ -46,6 +46,19 @@ export const updateStaffSchema = createStaffSchema.partial().extend({
   active: z.boolean().optional(),
 });
 
+export const createCustomerSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\+?[0-9]{9,15}$/, "Enter a valid phone number, e.g. +233201234567"),
+  notes: z.string().trim().max(300).optional().or(z.literal("")),
+});
+
+export const updateCustomerSchema = createCustomerSchema.partial().extend({
+  active: z.boolean().optional(),
+});
+
 export const createServiceTypeSchema = z
   .object({
     name: z.string().trim().min(2).max(60),

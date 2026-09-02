@@ -25,18 +25,27 @@ const PRESETS = [
   { label: "This Month", from: () => startOfMonth(today()), to: () => today() },
 ];
 
+const REPORT_TYPES = [
+  { type: "summary", label: "Summary Report", description: "Revenue, splits, expenses, and net profit at a glance." },
+  {
+    type: "commissions",
+    label: "Commissions & Staff Performance",
+    description: "Per-boy washes, gross revenue, and commission payouts.",
+  },
+  { type: "expenses", label: "Expenses Report", description: "Every operating expense recorded in the period." },
+  { type: "washes", label: "Wash Report", description: "The full list of wash records in the period." },
+] as const;
+
 export function ReportGenerator() {
   const [from, setFrom] = useState(isoDate(startOfMonth(today())));
   const [to, setTo] = useState(isoDate(today()));
-
-  const printUrl = `/reports/print?from=${from}&to=${to}`;
 
   return (
     <div className="bg-surface-container-lowest rounded-xl shadow-level-1 p-card-padding flex flex-col gap-4">
       <div>
         <h3 className="text-headline-md font-headline-md">Generate a Report</h3>
         <p className="text-sm text-on-surface-variant mt-1">
-          Pick a date range, then open the report — it opens in a new tab styled for printing, so you can use your
+          Pick a date range, then open a report — it opens in a new tab styled for printing, so you can use your
           browser's Print dialog to save it as a PDF or send it straight to a printer.
         </p>
       </div>
@@ -79,15 +88,23 @@ export function ReportGenerator() {
         </div>
       </div>
 
-      <a
-        href={printUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="self-start flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg text-label-caps font-label-caps font-medium hover:bg-primary/90 transition-colors shadow-sm"
-      >
-        <span className="material-symbols-outlined text-[18px]">description</span>
-        Generate &amp; Print Report
-      </a>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {REPORT_TYPES.map((r) => (
+          <a
+            key={r.type}
+            href={`/reports/print?from=${from}&to=${to}&type=${r.type}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col gap-1 p-4 border border-outline-variant rounded-lg hover:bg-surface-container-high hover:border-primary transition-colors"
+          >
+            <span className="flex items-center gap-2 text-on-surface font-medium">
+              <span className="material-symbols-outlined text-[18px] text-primary">description</span>
+              {r.label}
+            </span>
+            <span className="text-xs text-on-surface-variant">{r.description}</span>
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

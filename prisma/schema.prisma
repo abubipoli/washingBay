@@ -90,6 +90,20 @@ model Staff {
   @@index([active])
 }
 
+// A customer contact for direct/bulk SMS notices (promos, reminders) —
+// unrelated to WashRecord, which tracks jobs by vehicle plate, not customer.
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String   @unique
+  notes     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+}
+
 model ServiceType {
   id                 String   @id @default(cuid())
   name               String   @unique

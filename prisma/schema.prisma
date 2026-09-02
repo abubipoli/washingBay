@@ -1,0 +1,206 @@
+// First Class Washing Bay — data model
+//
+// Money split model: every WashRecord stores the three-way (or flexible
+// two-way, e.g. blowing-only jobs with no soap leg) breakdown as explicit
+// amounts rather than recomputing percentages at read time. This keeps the
+// historical record accurate even when a manager overrides the split for a
+// one-off job, and keeps reporting a simple SUM() over stored columns.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  MANAGER
+}
+
+enum VehicleType {
+  CAR
+  SUV
+  TRUCK
+  BUS
+  MOTORBIKE
+  VAN
+  OTHER
+}
+
+enum WashStatus {
+  QUEUED
+  WASHING
+  DETAILING
+  COMPLETED
+  CANCELLED
+}
+
+enum ExpenseCategory {
+  ELECTRICITY
+  WATER
+  SOAP_CHEMICALS
+  MAINTENANCE
+  SALARY
+  RENT
+  OTHER
+}
+
+enum PayoutStatus {
+  PENDING
+  PAID
+}
+
+enum NotifyChannel {
+  SMS
+  RECEIPT_PRINT
+  NONE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(MANAGER)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  washRecords WashRecord[] @relation("RecordedBy")
+  expenses    Expense[]
+  payouts     Payout[]
+}
+
+model Staff {
+  id        String    @id @default(cuid())
+  name      String
+  phone     String    @unique
+  photoUrl  String?
+  active    Boolean   @default(true)
+  joinedAt  DateTime  @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  washRecords WashRecord[]
+  payouts     Payout[]
+
+  @@index([active])
+}
+
+model ServiceType {
+  id                 String   @id @default(cuid())
+  name               String   @unique
+  defaultPrice       Decimal  @db.Decimal(10, 2)
+  // Default split percentages (0-100), stored with decimal precision on
+  // purpose: an even three-way split is 33.33...%, and rounding that to a
+  // whole-number percent (33%) would make GHS 30 split into 9.90/9.90/10.20
+  // instead of an exact 10/10/10. Soap can be 0 for jobs like blowing that
+  // only split two ways (business / staff).
+  defaultBusinessPct Float
+  defaultStaffPct    Float
+  defaultSoapPct     Float
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  washRecords WashRecord[]
+}
+
+model WashRecord {
+  id             String      @id @default(cuid())
+  vehiclePlate   String
+  vehicleMake    String?
+  vehicleType    VehicleType @default(CAR)
+  // Denormalized label so historical receipts still read correctly even if
+  // the ServiceType is later renamed or removed.
+  serviceLabel   String
+  serviceType    ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull)
+  serviceTypeId  String?
+
+  staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Restrict)
+  staffId String
+
+  totalAmount    Decimal @db.Decimal(10, 2)
+  amountBusiness Decimal @db.Decimal(10, 2)
+  amountStaff    Decimal @db.Decimal(10, 2)
+  amountSoap     Decimal @db.Decimal(10, 2)
+
+  status      WashStatus @default(QUEUED)
+  notes       String?
+
+  recordedBy   User   @relation("RecordedBy", fields: [recordedById], references: [id], onDelete: Restrict)
+  recordedById String
+
+  payout   Payout? @relation(fields: [payoutId], references: [id], onDelete: SetNull)
+  payoutId String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+
+  @@index([createdAt])
+  @@index([staffId, createdAt])
+  @@index([status])
+  @@index([payoutId])
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  category    ExpenseCategory
+  amount      Decimal         @db.Decimal(10, 2)
+  description String?
+  date        DateTime        @default(now())
+
+  recordedBy   User   @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+  recordedById String
+
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@index([category])
+}
+
+model Payout {
+  id          String       @id @default(cuid())
+  staff       Staff        @relation(fields: [staffId], references: [id], onDelete: Restrict)
+  staffId     String
+  periodStart DateTime
+  periodEnd   DateTime
+  totalAmount Decimal      @db.Decimal(10, 2)
+  washCount   Int
+  status      PayoutStatus @default(PENDING)
+
+  notifiedChannel NotifyChannel @default(NONE)
+  notifiedAt      DateTime?
+
+  createdBy   User   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdById String
+
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  washRecords WashRecord[]
+
+  @@index([staffId, createdAt])
+}
+
+// Singleton row (id always "default") holding business-wide configuration.
+model BusinessSettings {
+  id           String  @id @default("default")
+  businessName String  @default("First Class Washing Bay")
+  currency     String  @default("GHS")
+  address      String?
+  phone        String?
+
+  // SMS provider config, editable from Settings instead of only via .env.
+  // Empty/null fields fall back to the matching env var (see src/lib/sms).
+  smsProvider     String  @default("console")
+  kairosBaseUrl   String?
+  kairosApiKey    String?
+  kairosSenderId  String?
+
+  updatedAt    DateTime @updatedAt
+}

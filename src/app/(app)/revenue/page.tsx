@@ -77,12 +77,12 @@ export default async function RevenuePage({
       <div className="bg-surface-container-lowest rounded-xl shadow-level-1 overflow-hidden">
           <div className="p-card-padding border-b border-outline-variant/30 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-surface-bright/50">
             <h3 className="text-headline-md font-headline-md">Wash Records</h3>
-            <form className="flex gap-2" action="/revenue">
+            <form className="flex flex-wrap gap-2" action="/revenue">
               <input
                 name="q"
                 defaultValue={searchParams.q}
                 placeholder="Search vehicle number..."
-                className="px-3 py-1.5 border border-outline-variant rounded-lg text-sm"
+                className="flex-1 min-w-[140px] px-3 py-1.5 border border-outline-variant rounded-lg text-sm"
               />
               <select name="status" defaultValue={searchParams.status ?? ""} className="px-3 py-1.5 border border-outline-variant rounded-lg text-sm">
                 <option value="">All statuses</option>

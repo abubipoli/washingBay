@@ -87,7 +87,7 @@ export function DailyCommissionBoard({
         const donePaid = paid[g.staffId];
         return (
           <div key={g.staffId} className="bg-surface-container-lowest rounded-xl shadow-level-1 overflow-hidden">
-            <div className="p-card-padding border-b border-outline-variant/30 flex items-center justify-between gap-3 bg-surface-bright/50">
+            <div className="p-card-padding border-b border-outline-variant/30 flex flex-wrap items-center justify-between gap-3 bg-surface-bright/50">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm">
                   {g.name.slice(0, 1).toUpperCase()}
@@ -111,7 +111,7 @@ export function DailyCommissionBoard({
               ) : openStaffId === g.staffId ? (
                 <div className="flex flex-col items-end gap-1">
                   <p className="text-xs text-on-surface-variant">Notify how?</p>
-                  <div className="flex gap-1">
+                  <div className="flex flex-wrap justify-end gap-1">
                     <button disabled={submitting} onClick={() => pay(g.staffId, "SMS")} className="px-2 py-1 bg-primary text-on-primary rounded text-xs disabled:opacity-60">SMS</button>
                     <button disabled={submitting} onClick={() => pay(g.staffId, "RECEIPT_PRINT")} className="px-2 py-1 bg-secondary-container text-on-secondary-container rounded text-xs disabled:opacity-60">Print receipt</button>
                     <button disabled={submitting} onClick={() => pay(g.staffId, "NONE")} className="px-2 py-1 bg-surface-container-high text-on-surface rounded text-xs disabled:opacity-60">No notice</button>
@@ -128,7 +128,8 @@ export function DailyCommissionBoard({
               )}
             </div>
 
-            <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[480px]">
               <thead>
                 <tr className="bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps">
                   <th className="py-2 px-4 font-medium">Time</th>
@@ -156,6 +157,7 @@ export function DailyCommissionBoard({
                 </tr>
               </tfoot>
             </table>
+            </div>
           </div>
         );
       })}

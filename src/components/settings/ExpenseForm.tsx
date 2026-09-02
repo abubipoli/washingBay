@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney } from "@/lib/money";
+import { enqueueWrite, isNetworkFailure } from "@/lib/offline/queue";
 
 type Expense = {
   id: string;
@@ -30,25 +31,41 @@ export function ExpenseForm({ expenses, currency }: { expenses: Expense[]; curre
   const [description, setDescription] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [queuedOffline, setQueuedOffline] = useState(false);
 
   async function addExpense(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setQueuedOffline(false);
     setSubmitting(true);
-    const res = await fetch("/api/expenses", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ category, amount, description: description || undefined }),
-    });
-    setSubmitting(false);
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      setError(body?.error?.formErrors?.[0] ?? body?.error ?? "Could not record expense");
-      return;
+    const payload = { category, amount, description: description || undefined };
+    try {
+      const res = await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      setSubmitting(false);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(body?.error?.formErrors?.[0] ?? body?.error ?? "Could not record expense");
+        return;
+      }
+      setAmount("");
+      setDescription("");
+      router.refresh();
+    } catch (err) {
+      setSubmitting(false);
+      if (isNetworkFailure(err)) {
+        await enqueueWrite("expense", `${CATEGORIES.find((c) => c.value === category)?.label} — ${currency} ${amount}`, "/api/expenses", payload);
+        setAmount("");
+        setDescription("");
+        setQueuedOffline(true);
+        setTimeout(() => setQueuedOffline(false), 4000);
+      } else {
+        setError("Something went wrong");
+      }
     }
-    setAmount("");
-    setDescription("");
-    router.refresh();
   }
 
   return (
@@ -80,6 +97,9 @@ export function ExpenseForm({ expenses, currency }: { expenses: Expense[]; curre
         </button>
       </form>
       {error && <p className="text-error text-sm">{error}</p>}
+      {queuedOffline && (
+        <p className="text-primary text-sm">Saved offline — it'll sync automatically once you're back online.</p>
+      )}
 
       <ul className="divide-y divide-outline-variant max-h-72 overflow-y-auto">
         {expenses.map((e) => (

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { computeDefaultSplit, roundMoney } from "@/lib/money";
+import { enqueueWrite, isNetworkFailure } from "@/lib/offline/queue";
 
 type ServiceType = {
   id: string;
@@ -65,6 +66,7 @@ export function RecordWashModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedWashId, setSavedWashId] = useState<string | null>(null);
+  const [savedOffline, setSavedOffline] = useState(false);
 
   const selectedService = useMemo(
     () => serviceTypes.find((s) => s.id === serviceTypeId),
@@ -101,6 +103,7 @@ export function RecordWashModal({
     setSplitTouched(false);
     setError(null);
     setSavedWashId(null);
+    setSavedOffline(false);
     setSubmitting(false);
     if (first) {
       setTotal(first.defaultPrice);
@@ -162,24 +165,26 @@ export function RecordWashModal({
       return;
     }
 
+    const payload = {
+      vehiclePlate,
+      vehicleMake: vehicleMake || undefined,
+      vehicleType,
+      serviceTypeId: serviceTypeId || undefined,
+      serviceLabel,
+      staffId,
+      totalAmount: totalNum,
+      amountBusiness: Number(business),
+      amountStaff: Number(staffCut),
+      amountSoap: Number(soap),
+      notes: notes || undefined,
+    };
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/washes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          vehiclePlate,
-          vehicleMake: vehicleMake || undefined,
-          vehicleType,
-          serviceTypeId: serviceTypeId || undefined,
-          serviceLabel,
-          staffId,
-          totalAmount: totalNum,
-          amountBusiness: Number(business),
-          amountStaff: Number(staffCut),
-          amountSoap: Number(soap),
-          notes: notes || undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const body = await res.json().catch(() => ({}));
@@ -190,7 +195,12 @@ export function RecordWashModal({
       router.refresh();
       setSavedWashId(body.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      if (isNetworkFailure(err)) {
+        await enqueueWrite("wash", `${vehiclePlate} — ${currency} ${totalNum}`, "/api/washes", payload);
+        setSavedOffline(true);
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -206,7 +216,29 @@ export function RecordWashModal({
       }}
     >
       <div className="bg-surface-container-lowest rounded-xl shadow-level-2 w-full max-w-lg max-h-[90vh] overflow-y-auto p-card-padding">
-        {savedWashId ? (
+        {savedOffline ? (
+          <div className="flex flex-col items-center text-center gap-4 py-4">
+            <span className="material-symbols-outlined text-primary" style={{ fontSize: 48 }}>
+              cloud_off
+            </span>
+            <h3 className="text-headline-md font-headline-md">Saved offline</h3>
+            <p className="text-on-surface-variant">
+              No connection right now, so this wash was saved on this device. It'll sync automatically once you're
+              back online — check the pending badge at the top of the screen.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 bg-primary text-on-primary rounded-lg font-label-caps text-label-caps font-medium hover:bg-primary/90 transition-colors"
+              >
+                Done
+              </button>
+            </div>
+            <button onClick={resetForm} className="text-primary text-label-caps font-label-caps mt-1">
+              + Record another wash
+            </button>
+          </div>
+        ) : savedWashId ? (
           <div className="flex flex-col items-center text-center gap-4 py-4">
             <span className="material-symbols-outlined text-success" style={{ fontSize: 48 }}>
               check_circle

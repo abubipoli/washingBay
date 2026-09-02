@@ -230,7 +230,7 @@ export function CustomerManager({ customers }: { customers: Customer[] }) {
               </div>
             </li>
           ) : (
-            <li key={c.id} className="flex items-center justify-between py-2 gap-3">
+            <li key={c.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 gap-2 sm:gap-3">
               <label className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer">
                 <input
                   type="checkbox"
@@ -246,7 +246,7 @@ export function CustomerManager({ customers }: { customers: Customer[] }) {
                   </p>
                 </div>
               </label>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 shrink-0 pl-7 sm:pl-0">
                 <button
                   type="button"
                   disabled={sending}

@@ -145,7 +145,7 @@ export default async function StaffPerformancePage({
             </div>
           </div>
           <div className="overflow-x-auto flex-1">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[640px]">
               <thead>
                 <tr className="bg-surface-container-low border-b border-outline-variant">
                   <th className="py-3 px-4 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">Staff Member</th>
@@ -219,7 +219,7 @@ export default async function StaffPerformancePage({
           </p>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[720px]">
             <thead>
               <tr className="bg-surface-container-low border-b border-outline-variant">
                 <th className="py-3 px-4 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">Date Paid</th>

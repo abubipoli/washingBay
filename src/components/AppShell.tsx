@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useState, type ReactNode } from "react";
+import { OfflineSyncStatus } from "@/components/OfflineSyncStatus";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
@@ -142,7 +143,8 @@ export function AppShell({
             </div>
           </form>
 
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+            <OfflineSyncStatus />
             <Link
               href="/revenue?action=new"
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-full text-label-caps font-label-caps font-medium hover:bg-primary-container/90 transition-colors"

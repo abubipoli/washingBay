@@ -139,7 +139,7 @@ export function StaffManager({ staff }: { staff: Staff[] }) {
               </div>
             </li>
           ) : (
-            <li key={s.id} className="flex items-center justify-between py-2 gap-3">
+            <li key={s.id} className="flex flex-col sm:flex-row sm:items-center justify-between py-2 gap-2 sm:gap-3">
               <div className="min-w-0">
                 <p className="font-medium text-on-surface truncate">{s.name}</p>
                 <p className="text-xs text-on-surface-variant font-data-tabular">{s.phone}</p>

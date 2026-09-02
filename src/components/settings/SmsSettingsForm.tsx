@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { PasswordInput } from "@/components/PasswordInput";
 
 export function SmsSettingsForm({
   initial,
@@ -10,7 +11,8 @@ export function SmsSettingsForm({
   initial: {
     smsProvider: string;
     kairosBaseUrl: string | null;
-    kairosApiKey: string | null;
+    kairosAccessKey: string | null;
+    kairosAccessSecret: string | null;
     kairosSenderId: string | null;
   };
   isOwner: boolean;
@@ -18,9 +20,9 @@ export function SmsSettingsForm({
   const router = useRouter();
   const [provider, setProvider] = useState(initial.smsProvider);
   const [baseUrl, setBaseUrl] = useState(initial.kairosBaseUrl ?? "");
-  const [apiKey, setApiKey] = useState(initial.kairosApiKey ?? "");
+  const [accessKey, setAccessKey] = useState(initial.kairosAccessKey ?? "");
+  const [accessSecret, setAccessSecret] = useState(initial.kairosAccessSecret ?? "");
   const [senderId, setSenderId] = useState(initial.kairosSenderId ?? "");
-  const [showKey, setShowKey] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +37,8 @@ export function SmsSettingsForm({
       body: JSON.stringify({
         smsProvider: provider,
         kairosBaseUrl: baseUrl,
-        kairosApiKey: apiKey,
+        kairosAccessKey: accessKey,
+        kairosAccessSecret: accessSecret,
         kairosSenderId: senderId,
       }),
     });
@@ -102,25 +105,27 @@ export function SmsSettingsForm({
                 className={`w-full px-3 py-2 border border-[#D0D5DD] rounded-lg ${disabledInput}`}
               />
             </div>
-            <div className="sm:col-span-2">
-              <label className="text-xs text-on-surface-variant block mb-1">API Key</label>
-              <div className="flex gap-2">
-                <input
-                  disabled={!isOwner}
-                  type={showKey ? "text" : "password"}
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Paste the API key Kairos Africa gave you"
-                  className={`flex-1 px-3 py-2 border border-[#D0D5DD] rounded-lg font-data-tabular ${disabledInput}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey((v) => !v)}
-                  className="px-3 py-2 bg-surface-container-high rounded-lg text-sm shrink-0"
-                >
-                  {showKey ? "Hide" : "Show"}
-                </button>
-              </div>
+            <div>
+              <label className="text-xs text-on-surface-variant block mb-1">API Access Key</label>
+              <PasswordInput
+                id="kairosAccessKey"
+                disabled={!isOwner}
+                value={accessKey}
+                onChange={setAccessKey}
+                placeholder="From Kairos Africa's API Access Credential panel"
+                className={disabledInput}
+              />
+            </div>
+            <div>
+              <label className="text-xs text-on-surface-variant block mb-1">API Access Secret</label>
+              <PasswordInput
+                id="kairosAccessSecret"
+                disabled={!isOwner}
+                value={accessSecret}
+                onChange={setAccessSecret}
+                placeholder="Also from that same panel"
+                className={disabledInput}
+              />
             </div>
           </>
         )}

@@ -3,40 +3,45 @@ import type { SendSmsResult, SmsProvider } from "./types";
 /**
  * Kairos Africa SMS gateway adapter.
  *
- * NOTE: Kairos Africa's exact request/response contract wasn't available
- * when this was written, so this adapter assumes a conventional REST shape
- * (Bearer auth, JSON body, POST /sms/send). Once you have their real API
- * docs, this is the only file you should need to touch — everything else in
- * the app talks to the `SmsProvider` interface, not to Kairos directly.
- * Adjust `endpoint`, the request body shape, and the response-parsing logic
- * below to match.
+ * Kairos Africa authenticates with an Access Key + Access Secret pair (see
+ * their dashboard's "API Access Credential" panel), not a single API key.
+ * Their exact request contract wasn't available when this was written, so
+ * this sends the pair as HTTP Basic Auth (`key:secret`, base64-encoded) —
+ * the conventional way REST APIs consume a key/secret pair (same pattern as
+ * Twilio's Account SID + Auth Token). If Kairos's real docs specify a
+ * different scheme (e.g. both values in the JSON body, or an HMAC
+ * signature), this is the only file that needs to change — everything else
+ * in the app talks to the `SmsProvider` interface, not to Kairos directly.
  */
 export class KairosSmsProvider implements SmsProvider {
   readonly name = "Kairos Africa";
 
   private readonly baseUrl: string;
-  private readonly apiKey: string;
+  private readonly accessKey: string;
+  private readonly accessSecret: string;
   private readonly senderId: string;
 
-  constructor(config: { baseUrl: string; apiKey: string; senderId: string }) {
+  constructor(config: { baseUrl: string; accessKey: string; accessSecret: string; senderId: string }) {
     this.baseUrl = config.baseUrl.replace(/\/+$/, "");
-    this.apiKey = config.apiKey;
+    this.accessKey = config.accessKey;
+    this.accessSecret = config.accessSecret;
     this.senderId = config.senderId;
   }
 
   async sendSms(toPhone: string, message: string): Promise<SendSmsResult> {
-    if (!this.apiKey) {
-      return { success: false, error: "KAIROS_API_KEY is not configured" };
+    if (!this.accessKey || !this.accessSecret) {
+      return { success: false, error: "Kairos Africa API Access Key/Secret is not configured" };
     }
 
     const endpoint = `${this.baseUrl}/sms/send`;
+    const basicAuth = Buffer.from(`${this.accessKey}:${this.accessSecret}`).toString("base64");
 
     try {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${this.apiKey}`,
+          Authorization: `Basic ${basicAuth}`,
         },
         body: JSON.stringify({
           to: normalizePhone(toPhone),

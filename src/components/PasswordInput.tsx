@@ -11,6 +11,7 @@ export function PasswordInput({
   value,
   onChange,
   required,
+  disabled,
   autoComplete,
   minLength,
   placeholder,
@@ -20,6 +21,7 @@ export function PasswordInput({
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
+  disabled?: boolean;
   autoComplete?: string;
   minLength?: number;
   placeholder?: string;
@@ -33,6 +35,7 @@ export function PasswordInput({
         id={id}
         type={visible ? "text" : "password"}
         required={required}
+        disabled={disabled}
         autoComplete={autoComplete}
         minLength={minLength}
         value={value}
@@ -43,10 +46,11 @@ export function PasswordInput({
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
+        disabled={disabled}
         aria-label={visible ? "Hide password" : "Show password"}
         aria-pressed={visible}
         tabIndex={-1}
-        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-primary transition-colors"
+        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-40"
       >
         <span className="material-symbols-outlined text-[20px]">{visible ? "visibility_off" : "visibility"}</span>
       </button>

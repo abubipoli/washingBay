@@ -9,7 +9,8 @@ export type { SmsProvider, SendSmsResult } from "./types";
 export type SmsSettings = {
   smsProvider: string;
   kairosBaseUrl: string | null;
-  kairosApiKey: string | null;
+  kairosAccessKey: string | null;
+  kairosAccessSecret: string | null;
   kairosSenderId: string | null;
 };
 
@@ -25,7 +26,8 @@ export function getSmsProviderFromSettings(settings: SmsSettings): SmsProvider {
   if (settings.smsProvider === "kairos") {
     return new KairosSmsProvider({
       baseUrl: settings.kairosBaseUrl || process.env.KAIROS_API_BASE_URL || "",
-      apiKey: settings.kairosApiKey || process.env.KAIROS_API_KEY || "",
+      accessKey: settings.kairosAccessKey || process.env.KAIROS_ACCESS_KEY || "",
+      accessSecret: settings.kairosAccessSecret || process.env.KAIROS_ACCESS_SECRET || "",
       senderId: settings.kairosSenderId || process.env.KAIROS_SENDER_ID || "FirstClass",
     });
   }

@@ -14,7 +14,8 @@ const updateSettingsSchema = z.object({
   phone: z.string().trim().max(20).optional().or(z.literal("")),
   smsProvider: z.enum(["console", "kairos"]).optional(),
   kairosBaseUrl: z.string().trim().max(300).optional().or(z.literal("")),
-  kairosApiKey: z.string().trim().max(300).optional().or(z.literal("")),
+  kairosAccessKey: z.string().trim().max(300).optional().or(z.literal("")),
+  kairosAccessSecret: z.string().trim().max(300).optional().or(z.literal("")),
   kairosSenderId: z.string().trim().max(20).optional().or(z.literal("")),
 });
 

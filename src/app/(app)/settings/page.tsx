@@ -66,7 +66,8 @@ export default async function SettingsPage() {
         initial={{
           smsProvider: settings.smsProvider,
           kairosBaseUrl: settings.kairosBaseUrl,
-          kairosApiKey: settings.kairosApiKey,
+          kairosAccessKey: settings.kairosAccessKey,
+          kairosAccessSecret: settings.kairosAccessSecret,
           kairosSenderId: settings.kairosSenderId,
         }}
         isOwner={isOwner}

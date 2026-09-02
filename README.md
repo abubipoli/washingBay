@@ -123,15 +123,23 @@ Every wash receipt is also printable from the Revenue Recording table
 
 ### Wiring up Kairos Africa for real SMS
 
-`src/lib/sms/kairos-provider.ts` is a best-effort adapter (REST + Bearer
-auth) written without access to Kairos Africa's actual API reference. Once
-you have their docs:
+`src/lib/sms/kairos-provider.ts` is a best-effort adapter (REST + HTTP Basic
+Auth using Kairos's Key + Secret pair) written without access to Kairos
+Africa's actual API reference. Their dashboard's "API Access Credential"
+panel gives you an **Access Key** and **Access Secret** — enter both in
+Settings > SMS Notifications (or as `KAIROS_ACCESS_KEY` /
+`KAIROS_ACCESS_SECRET` in `.env` as a fallback). Once you have their real
+docs:
 
-1. Set `SMS_PROVIDER=kairos`, `KAIROS_API_BASE_URL`, `KAIROS_API_KEY`,
-   `KAIROS_SENDER_ID` in `.env`.
-2. Open `src/lib/sms/kairos-provider.ts` and adjust the endpoint path and the
-   request/response JSON shape to match their real contract. Nothing else in
-   the app needs to change — everything talks to the `SmsProvider` interface.
+1. Set the provider to Kairos Africa in Settings (or `SMS_PROVIDER=kairos`
+   in `.env`), and fill in the Base URL, Access Key, Access Secret, and
+   Sender ID.
+2. Open `src/lib/sms/kairos-provider.ts` and adjust the endpoint path, the
+   auth scheme (it currently assumes Basic Auth over the key/secret — adjust
+   if Kairos actually wants something else, e.g. both in the JSON body or an
+   HMAC signature), and the request/response JSON shape to match their real
+   contract. Nothing else in the app needs to change — everything talks to
+   the `SmsProvider` interface.
 
 ## Installing as a mobile app (PWA)
 

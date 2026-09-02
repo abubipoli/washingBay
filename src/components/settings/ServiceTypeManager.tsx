@@ -98,7 +98,7 @@ function ServiceTypeRow({ service, isOwner, currency }: { service: ServiceType; 
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <label className="text-xs text-on-surface-variant block mb-1">Default price ({currency})</label>
+          <label className="text-xs text-on-surface-variant flex items-end min-h-[2rem] mb-1">Default price ({currency})</label>
           <input
             disabled={!isOwner}
             type="number" min="0" step="0.01"
@@ -110,7 +110,7 @@ function ServiceTypeRow({ service, isOwner, currency }: { service: ServiceType; 
         {!isManual && (
           <>
             <div>
-              <label className="text-xs text-on-surface-variant block mb-1">Business %</label>
+              <label className="text-xs text-on-surface-variant flex items-end min-h-[2rem] mb-1">Business %</label>
               <input
                 disabled={!isOwner}
                 type="number" min="0" max="100" step="0.01"
@@ -120,7 +120,7 @@ function ServiceTypeRow({ service, isOwner, currency }: { service: ServiceType; 
               />
             </div>
             <div>
-              <label className="text-xs text-on-surface-variant block mb-1">Boy %</label>
+              <label className="text-xs text-on-surface-variant flex items-end min-h-[2rem] mb-1">Boy %</label>
               <input
                 disabled={!isOwner}
                 type="number" min="0" max="100" step="0.01"
@@ -130,7 +130,7 @@ function ServiceTypeRow({ service, isOwner, currency }: { service: ServiceType; 
               />
             </div>
             <div>
-              <label className="text-xs text-on-surface-variant block mb-1">Soap %</label>
+              <label className="text-xs text-on-surface-variant flex items-end min-h-[2rem] mb-1">Soap %</label>
               <input
                 disabled={!isOwner}
                 type="number" min="0" max="100" step="0.01"

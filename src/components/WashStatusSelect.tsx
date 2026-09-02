@@ -19,6 +19,7 @@ export function WashStatusSelect({
 }: {
   washId: string;
   status: WashStatus;
+  /** True once paid out — status can never change after that. */
   locked: boolean;
 }) {
   const router = useRouter();
@@ -41,10 +42,19 @@ export function WashStatusSelect({
     }
   }
 
-  if (locked) {
+  // A completed wash is final — it feeds straight into the boy's commission
+  // total, so it can't be flipped to Cancelled (or anything else) afterward
+  // by mistake. Paying it out locks it a second, permanent way (payoutId).
+  const completedLocked = current === "COMPLETED";
+
+  if (locked || completedLocked) {
     return (
-      <span className="text-xs text-on-surface-variant italic" title="Paid out — status locked">
-        {OPTIONS.find((o) => o.value === current)?.label} (paid)
+      <span
+        className="text-xs text-on-surface-variant italic"
+        title={locked ? "Paid out — status locked" : "Completed — locked from further status changes"}
+      >
+        {OPTIONS.find((o) => o.value === current)?.label}
+        {locked ? " (paid)" : ""}
       </span>
     );
   }

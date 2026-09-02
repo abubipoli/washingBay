@@ -4,7 +4,6 @@ import { getBusinessSummary, getRevenueTrend, rangeBounds, type ReportRange } fr
 import { formatMoney } from "@/lib/money";
 import { KpiCard } from "@/components/KpiCard";
 import { StatusBadge } from "@/components/StatusBadge";
-import { SplitChips } from "@/components/SplitChips";
 import { RevenueTrendChart } from "@/components/RevenueTrendChart";
 
 export const dynamic = "force-dynamic";
@@ -193,7 +192,7 @@ export default async function DashboardPage({
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full text-left border-collapse min-w-[960px]">
             <thead>
               <tr className="bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps">
                 <th className="py-3 px-6 font-medium">Vehicle / Time</th>
@@ -201,20 +200,15 @@ export default async function DashboardPage({
                 <th className="py-3 px-6 font-medium">Service Type</th>
                 <th className="py-3 px-6 font-medium">Status</th>
                 <th className="py-3 px-6 font-medium">Total ({currency})</th>
-                <th className="py-3 px-6 font-medium">
-                  <div>Split</div>
-                  <div className="flex gap-2 mt-0.5 normal-case font-normal text-[10px]">
-                    <span className="text-primary">Business</span>
-                    <span className="text-on-surface-variant">Washing Boy</span>
-                    <span className="text-tertiary">Soap</span>
-                  </div>
-                </th>
+                <th className="py-3 px-6 font-medium text-primary">Business</th>
+                <th className="py-3 px-6 font-medium">Washing Boy</th>
+                <th className="py-3 px-6 font-medium text-tertiary">Soap</th>
               </tr>
             </thead>
             <tbody className="text-data-tabular font-data-tabular">
               {recentWashes.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-8 px-6 text-center text-on-surface-variant">
+                  <td colSpan={8} className="py-8 px-6 text-center text-on-surface-variant">
                     No washes recorded yet.{" "}
                     <Link href="/revenue?action=new" className="text-primary font-medium">
                       Record the first one →
@@ -241,9 +235,9 @@ export default async function DashboardPage({
                     <StatusBadge status={w.status} />
                   </td>
                   <td className="py-4 px-6 font-medium text-on-surface">{formatMoney(w.totalAmount, currency)}</td>
-                  <td className="py-4 px-6">
-                    <SplitChips business={w.amountBusiness} staff={w.amountStaff} soap={w.amountSoap} currency={currency} />
-                  </td>
+                  <td className="py-4 px-6 text-primary">{formatMoney(w.amountBusiness, currency)}</td>
+                  <td className="py-4 px-6">{formatMoney(w.amountStaff, currency)}</td>
+                  <td className="py-4 px-6 text-tertiary">{formatMoney(w.amountSoap, currency)}</td>
                 </tr>
               ))}
             </tbody>

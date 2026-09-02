@@ -4,9 +4,9 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMoney } from "@/lib/money";
 import { RevenueRecordingArea } from "@/components/RevenueRecordingArea";
-import { SplitChips } from "@/components/SplitChips";
 import { WashStatusSelect } from "@/components/WashStatusSelect";
 import { EditWashButton } from "@/components/EditWashButton";
+import { DeleteWashButton } from "@/components/DeleteWashButton";
 import type { WashStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -96,7 +96,7 @@ export default async function RevenuePage({
             </form>
           </div>
           <div className="overflow-x-auto max-h-[720px]">
-            <table className="w-full text-left border-collapse min-w-[720px]">
+            <table className="w-full text-left border-collapse min-w-[980px]">
               <thead className="sticky top-0">
                 <tr className="bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps">
                   <th className="py-3 px-4 font-medium">Vehicle / Time</th>
@@ -104,22 +104,18 @@ export default async function RevenuePage({
                   <th className="py-3 px-4 font-medium">Service</th>
                   <th className="py-3 px-4 font-medium">Status</th>
                   <th className="py-3 px-4 font-medium">Total</th>
-                  <th className="py-3 px-4 font-medium">
-                    <div>Split</div>
-                    <div className="flex gap-2 mt-0.5 normal-case font-normal text-[10px]">
-                      <span className="text-primary">Business</span>
-                      <span className="text-on-surface-variant">Washing Boy</span>
-                      <span className="text-tertiary">Soap</span>
-                    </div>
-                  </th>
+                  <th className="py-3 px-4 font-medium text-primary">Business</th>
+                  <th className="py-3 px-4 font-medium">Washing Boy</th>
+                  <th className="py-3 px-4 font-medium text-tertiary">Soap</th>
                   <th className="py-3 px-4 font-medium">Receipt</th>
                   <th className="py-3 px-4 font-medium">Edit</th>
+                  <th className="py-3 px-4 font-medium">Delete</th>
                 </tr>
               </thead>
               <tbody className="text-data-tabular font-data-tabular">
                 {washes.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="py-8 px-4 text-center text-on-surface-variant">
+                    <td colSpan={11} className="py-8 px-4 text-center text-on-surface-variant">
                       No wash records match your filters.
                     </td>
                   </tr>
@@ -138,9 +134,9 @@ export default async function RevenuePage({
                       <WashStatusSelect washId={w.id} status={w.status} locked={!!w.payoutId} />
                     </td>
                     <td className="py-3 px-4 font-medium text-on-surface">{formatMoney(w.totalAmount, currency)}</td>
-                    <td className="py-3 px-4">
-                      <SplitChips business={w.amountBusiness} staff={w.amountStaff} soap={w.amountSoap} currency={currency} />
-                    </td>
+                    <td className="py-3 px-4 text-primary">{formatMoney(w.amountBusiness, currency)}</td>
+                    <td className="py-3 px-4">{formatMoney(w.amountStaff, currency)}</td>
+                    <td className="py-3 px-4 text-tertiary">{formatMoney(w.amountSoap, currency)}</td>
                     <td className="py-3 px-4">
                       <Link href={`/receipt/wash/${w.id}`} className="text-primary text-xs font-medium hover:underline">
                         View / Print
@@ -167,6 +163,14 @@ export default async function RevenuePage({
                           amountSoap: Number(w.amountSoap),
                           notes: w.notes,
                         }}
+                      />
+                    </td>
+                    <td className="py-3 px-4">
+                      <DeleteWashButton
+                        washId={w.id}
+                        vehiclePlate={w.vehiclePlate}
+                        locked={!!w.payoutId}
+                        isOwner={isOwner}
                       />
                     </td>
                   </tr>

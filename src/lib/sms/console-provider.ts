@@ -1,4 +1,4 @@
-import type { SendSmsResult, SmsProvider } from "./types";
+import type { BalanceResult, SendSmsResult, SmsProvider } from "./types";
 
 /**
  * Development/offline fallback: "sends" SMS by logging to the server
@@ -13,5 +13,9 @@ export class ConsoleSmsProvider implements SmsProvider {
     // eslint-disable-next-line no-console
     console.log(`[sms:console] to=${toPhone} message="${message}"`);
     return { success: true, providerMessageId: `console-${Date.now()}` };
+  }
+
+  async getBalance(): Promise<BalanceResult> {
+    return { success: false, error: "Console mode has no real account — switch to Kairos Africa to check balance" };
   }
 }

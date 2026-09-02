@@ -12,7 +12,8 @@ const NAV_ITEMS = [
   { href: "/commission", label: "Daily Commission", icon: "fact_check" },
   { href: "/staff", label: "Staff Performance", icon: "groups" },
   { href: "/reports", label: "Reports", icon: "summarize" },
-  { href: "/settings", label: "Settings & Expenses", icon: "settings" },
+  { href: "/expenses", label: "Expenses", icon: "receipt_long" },
+  { href: "/settings", label: "Settings", icon: "settings" },
 ];
 
 export function AppShell({

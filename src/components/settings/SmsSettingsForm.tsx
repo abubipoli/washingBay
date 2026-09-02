@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PasswordInput } from "@/components/PasswordInput";
+import { buildPayoutSmsMessage, DEFAULT_PAYOUT_SMS_TEMPLATE, PAYOUT_SMS_PLACEHOLDERS } from "@/lib/sms";
 
 export function SmsSettingsForm({
   initial,
@@ -14,6 +15,7 @@ export function SmsSettingsForm({
     kairosAccessKey: string | null;
     kairosAccessSecret: string | null;
     kairosSenderId: string | null;
+    payoutSmsTemplate: string | null;
   };
   isOwner: boolean;
 }) {
@@ -23,9 +25,63 @@ export function SmsSettingsForm({
   const [accessKey, setAccessKey] = useState(initial.kairosAccessKey ?? "");
   const [accessSecret, setAccessSecret] = useState(initial.kairosAccessSecret ?? "");
   const [senderId, setSenderId] = useState(initial.kairosSenderId ?? "");
+  const [template, setTemplate] = useState(initial.payoutSmsTemplate ?? DEFAULT_PAYOUT_SMS_TEMPLATE);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [testPhone, setTestPhone] = useState("");
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const [checkingBalance, setCheckingBalance] = useState(false);
+  const [balanceResult, setBalanceResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  function currentProviderFields() {
+    return {
+      smsProvider: provider,
+      kairosBaseUrl: baseUrl,
+      kairosAccessKey: accessKey,
+      kairosAccessSecret: accessSecret,
+      kairosSenderId: senderId,
+    };
+  }
+
+  async function sendTestSms() {
+    if (!testPhone.trim()) {
+      setTestResult({ ok: false, message: "Enter a phone number to test with" });
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    const res = await fetch("/api/settings/sms-test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: testPhone, ...currentProviderFields() }),
+    });
+    const body = await res.json().catch(() => ({}));
+    setTesting(false);
+    setTestResult(
+      res.ok
+        ? { ok: true, message: "Test SMS sent — check the phone (or the server log in Console mode)." }
+        : { ok: false, message: body?.error ?? "Test SMS failed" }
+    );
+  }
+
+  async function checkBalance() {
+    setCheckingBalance(true);
+    setBalanceResult(null);
+    const res = await fetch("/api/settings/sms-balance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(currentProviderFields()),
+    });
+    const body = await res.json().catch(() => ({}));
+    setCheckingBalance(false);
+    setBalanceResult(
+      res.ok ? { ok: true, message: `Balance: ${body.balance}` } : { ok: false, message: body?.error ?? "Could not check balance" }
+    );
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -40,6 +96,7 @@ export function SmsSettingsForm({
         kairosAccessKey: accessKey,
         kairosAccessSecret: accessSecret,
         kairosSenderId: senderId,
+        payoutSmsTemplate: template,
       }),
     });
     setSaving(false);
@@ -51,6 +108,15 @@ export function SmsSettingsForm({
     router.refresh();
     setTimeout(() => setSaved(false), 2500);
   }
+
+  const preview = buildPayoutSmsMessage({
+    staffName: "Daniel T.",
+    amount: "GHS 35.00",
+    washCount: 3,
+    periodLabel: new Date().toLocaleDateString("en-GB"),
+    businessName: "First Class Washing Bay",
+    template,
+  });
 
   const disabledInput = "disabled:bg-surface-container-low disabled:text-on-surface-variant";
 
@@ -129,6 +195,80 @@ export function SmsSettingsForm({
             </div>
           </>
         )}
+
+        {isOwner && (
+          <div className="sm:col-span-2 border-t border-outline-variant pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-on-surface-variant block mb-1">Send a test SMS</label>
+              <div className="flex gap-2">
+                <input
+                  value={testPhone}
+                  onChange={(e) => setTestPhone(e.target.value)}
+                  placeholder="+233201234567"
+                  className="w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-data-tabular"
+                />
+                <button
+                  type="button"
+                  disabled={testing}
+                  onClick={sendTestSms}
+                  className="shrink-0 px-3 py-2 bg-secondary-container text-on-secondary-container rounded-lg text-label-caps font-label-caps font-medium disabled:opacity-60"
+                >
+                  {testing ? "Sending..." : "Send Test"}
+                </button>
+              </div>
+              {testResult && (
+                <p className={`text-xs mt-1 ${testResult.ok ? "text-success" : "text-error"}`}>{testResult.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="text-xs text-on-surface-variant block mb-1">Account balance</label>
+              <button
+                type="button"
+                disabled={checkingBalance}
+                onClick={checkBalance}
+                className="px-3 py-2 bg-secondary-container text-on-secondary-container rounded-lg text-label-caps font-label-caps font-medium disabled:opacity-60"
+              >
+                {checkingBalance ? "Checking..." : "Check Balance"}
+              </button>
+              {balanceResult && (
+                <p className={`text-xs mt-1 ${balanceResult.ok ? "text-success" : "text-error"}`}>{balanceResult.message}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="sm:col-span-2 border-t border-outline-variant pt-4">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-on-surface-variant" htmlFor="payoutSmsTemplate">
+              Payout SMS Message
+            </label>
+            {isOwner && template !== DEFAULT_PAYOUT_SMS_TEMPLATE && (
+              <button
+                type="button"
+                onClick={() => setTemplate(DEFAULT_PAYOUT_SMS_TEMPLATE)}
+                className="text-primary text-xs underline"
+              >
+                Reset to default
+              </button>
+            )}
+          </div>
+          <textarea
+            id="payoutSmsTemplate"
+            disabled={!isOwner}
+            value={template}
+            onChange={(e) => setTemplate(e.target.value)}
+            rows={3}
+            className={`w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-data-tabular text-sm ${disabledInput}`}
+          />
+          <p className="text-xs text-on-surface-variant mt-1">
+            Placeholders you can use: {PAYOUT_SMS_PLACEHOLDERS.join(", ")}
+          </p>
+          <div className="mt-2 bg-surface-container-low rounded-lg px-3 py-2">
+            <p className="text-xs text-on-surface-variant mb-1">Preview (sample data):</p>
+            <p className="text-sm text-on-surface">{preview}</p>
+          </div>
+        </div>
 
         {isOwner && (
           <button

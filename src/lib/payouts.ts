@@ -87,8 +87,9 @@ export async function payStaffForPeriod(params: {
       staffName: staff.name,
       amount: formatMoney(payout.totalAmount, settings.currency),
       washCount: payout.washCount,
-      periodLabel: periodStart.toLocaleDateString(),
+      periodLabel: periodStart.toLocaleDateString("en-GB"),
       businessName: settings.businessName,
+      template: settings.payoutSmsTemplate,
     });
     const result = await getSmsProviderFromSettings(settings).sendSms(staff.phone, message);
     if (result.success) notifiedChannel = "SMS";

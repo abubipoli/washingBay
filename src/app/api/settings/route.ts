@@ -17,6 +17,7 @@ const updateSettingsSchema = z.object({
   kairosAccessKey: z.string().trim().max(300).optional().or(z.literal("")),
   kairosAccessSecret: z.string().trim().max(300).optional().or(z.literal("")),
   kairosSenderId: z.string().trim().max(20).optional().or(z.literal("")),
+  payoutSmsTemplate: z.string().trim().max(480).optional().or(z.literal("")),
 });
 
 export async function GET() {

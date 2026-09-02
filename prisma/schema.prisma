@@ -204,6 +204,10 @@ model BusinessSettings {
   kairosAccessKey   String?
   kairosAccessSecret String?
   kairosSenderId    String?
+  // Editable payout SMS wording. Supports {{staffName}}, {{amount}},
+  // {{washCount}}, {{periodLabel}}, {{businessName}} placeholders — see
+  // buildPayoutSmsMessage(). Null uses the built-in default message.
+  payoutSmsTemplate String?
 
   updatedAt    DateTime @updatedAt
 }

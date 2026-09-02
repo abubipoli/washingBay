@@ -1,4 +1,4 @@
-import type { SendSmsResult, SmsProvider } from "./types";
+import type { BalanceResult, SendSmsResult, SmsProvider } from "./types";
 
 /**
  * Kairos Africa SMS gateway adapter.
@@ -62,6 +62,49 @@ export class KairosSmsProvider implements SmsProvider {
       return { success: true, providerMessageId: payload?.id ?? payload?.message_id };
     } catch (err) {
       return { success: false, error: err instanceof Error ? err.message : "Unknown SMS error" };
+    }
+  }
+
+  /**
+   * Best-effort account balance check — Kairos's exact endpoint/field names
+   * weren't available when this was written, so this tries the conventional
+   * `/balance` path and looks for a handful of likely field names in the
+   * response. If Kairos's real docs specify a different path or shape, this
+   * is the only method that needs to change.
+   */
+  async getBalance(): Promise<BalanceResult> {
+    if (!this.accessKey || !this.accessSecret) {
+      return { success: false, error: "Kairos Africa API Access Key/Secret is not configured" };
+    }
+
+    const endpoint = `${this.baseUrl}/balance`;
+    const basicAuth = Buffer.from(`${this.accessKey}:${this.accessSecret}`).toString("base64");
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: { Authorization: `Basic ${basicAuth}` },
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: payload?.message ?? `Kairos Africa returned HTTP ${response.status}`,
+        };
+      }
+
+      const raw =
+        payload?.balance ?? payload?.credits ?? payload?.sms_balance ?? payload?.data?.balance ?? payload?.data?.credits;
+
+      if (raw === undefined) {
+        return { success: false, error: "Kairos Africa responded, but no recognizable balance field was found" };
+      }
+
+      return { success: true, balance: String(raw) };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : "Unknown error checking balance" };
     }
   }
 }

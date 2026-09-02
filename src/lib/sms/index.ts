@@ -34,13 +34,37 @@ export function getSmsProviderFromSettings(settings: SmsSettings): SmsProvider {
   return new ConsoleSmsProvider();
 }
 
+export const DEFAULT_PAYOUT_SMS_TEMPLATE =
+  "{{businessName}}: Hi {{staffName}}, you have been paid {{amount}} for {{washCount}} wash(es) — {{periodLabel}}. Thank you for your hard work!";
+
+export const PAYOUT_SMS_PLACEHOLDERS = [
+  "{{staffName}}",
+  "{{amount}}",
+  "{{washCount}}",
+  "{{periodLabel}}",
+  "{{businessName}}",
+] as const;
+
+/**
+ * Fills in the payout SMS template (owner-editable in Settings, falling
+ * back to DEFAULT_PAYOUT_SMS_TEMPLATE) with this payout's actual values.
+ * Plain string replacement, not a templating engine — {{placeholder}}
+ * tokens only, so the wording stays simple enough for a non-technical
+ * owner to safely edit.
+ */
 export function buildPayoutSmsMessage(params: {
   staffName: string;
   amount: string;
   washCount: number;
   periodLabel: string;
   businessName: string;
+  template?: string | null;
 }): string {
-  const { staffName, amount, washCount, periodLabel, businessName } = params;
-  return `${businessName}: Hi ${staffName}, you have been paid ${amount} for ${washCount} wash(es) — ${periodLabel}. Thank you for your hard work!`;
+  const template = params.template?.trim() || DEFAULT_PAYOUT_SMS_TEMPLATE;
+  return template
+    .replaceAll("{{staffName}}", params.staffName)
+    .replaceAll("{{amount}}", params.amount)
+    .replaceAll("{{washCount}}", String(params.washCount))
+    .replaceAll("{{periodLabel}}", params.periodLabel)
+    .replaceAll("{{businessName}}", params.businessName);
 }

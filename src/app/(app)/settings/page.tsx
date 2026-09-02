@@ -3,7 +3,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { StaffManager } from "@/components/settings/StaffManager";
 import { ServiceTypeManager } from "@/components/settings/ServiceTypeManager";
-import { ExpenseForm } from "@/components/settings/ExpenseForm";
 import { BusinessSettingsForm } from "@/components/settings/BusinessSettingsForm";
 import { SmsSettingsForm } from "@/components/settings/SmsSettingsForm";
 
@@ -13,15 +12,10 @@ export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
   const isOwner = session?.user.role === "OWNER";
 
-  const [staff, serviceTypes, settings, expenses] = await Promise.all([
+  const [staff, serviceTypes, settings] = await Promise.all([
     prisma.staff.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }] }),
     prisma.serviceType.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
     prisma.businessSettings.upsert({ where: { id: "default" }, update: {}, create: { id: "default" } }),
-    prisma.expense.findMany({
-      include: { recordedBy: { select: { name: true } } },
-      orderBy: { date: "desc" },
-      take: 50,
-    }),
   ]);
 
   const currency = settings.currency;
@@ -29,9 +23,9 @@ export default async function SettingsPage() {
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-stack-lg">
       <div>
-        <h2 className="text-display-lg font-display-lg text-on-surface">Settings &amp; Expenses</h2>
+        <h2 className="text-display-lg font-display-lg text-on-surface">Settings</h2>
         <p className="text-on-surface-variant mt-1">
-          Manage your washing boys, service pricing, SMS notifications, and day-to-day operating expenses.
+          Manage your washing boys, service pricing, and SMS notifications.
         </p>
       </div>
 
@@ -69,20 +63,9 @@ export default async function SettingsPage() {
           kairosAccessKey: settings.kairosAccessKey,
           kairosAccessSecret: settings.kairosAccessSecret,
           kairosSenderId: settings.kairosSenderId,
+          payoutSmsTemplate: settings.payoutSmsTemplate,
         }}
         isOwner={isOwner}
-      />
-
-      <ExpenseForm
-        expenses={expenses.map((e) => ({
-          id: e.id,
-          category: e.category,
-          amount: e.amount.toString(),
-          description: e.description,
-          date: e.date.toISOString(),
-          recordedBy: e.recordedBy,
-        }))}
-        currency={currency}
       />
     </div>
   );

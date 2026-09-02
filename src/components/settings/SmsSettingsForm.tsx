@@ -11,7 +11,6 @@ export function SmsSettingsForm({
 }: {
   initial: {
     smsProvider: string;
-    kairosBaseUrl: string | null;
     kairosAccessKey: string | null;
     kairosAccessSecret: string | null;
     kairosSenderId: string | null;
@@ -21,7 +20,6 @@ export function SmsSettingsForm({
 }) {
   const router = useRouter();
   const [provider, setProvider] = useState(initial.smsProvider);
-  const [baseUrl, setBaseUrl] = useState(initial.kairosBaseUrl ?? "");
   const [accessKey, setAccessKey] = useState(initial.kairosAccessKey ?? "");
   const [accessSecret, setAccessSecret] = useState(initial.kairosAccessSecret ?? "");
   const [senderId, setSenderId] = useState(initial.kairosSenderId ?? "");
@@ -40,7 +38,6 @@ export function SmsSettingsForm({
   function currentProviderFields() {
     return {
       smsProvider: provider,
-      kairosBaseUrl: baseUrl,
       kairosAccessKey: accessKey,
       kairosAccessSecret: accessSecret,
       kairosSenderId: senderId,
@@ -92,7 +89,6 @@ export function SmsSettingsForm({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         smsProvider: provider,
-        kairosBaseUrl: baseUrl,
         kairosAccessKey: accessKey,
         kairosAccessSecret: accessSecret,
         kairosSenderId: senderId,
@@ -152,16 +148,6 @@ export function SmsSettingsForm({
         {provider === "kairos" && (
           <>
             <div>
-              <label className="text-xs text-on-surface-variant block mb-1">Kairos API Base URL</label>
-              <input
-                disabled={!isOwner}
-                value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
-                placeholder="https://api.kairosafrica.example/v1"
-                className={`w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-data-tabular ${disabledInput}`}
-              />
-            </div>
-            <div>
               <label className="text-xs text-on-surface-variant block mb-1">Sender ID</label>
               <input
                 disabled={!isOwner}
@@ -170,6 +156,9 @@ export function SmsSettingsForm({
                 placeholder="FirstClass"
                 className={`w-full px-3 py-2 border border-[#D0D5DD] rounded-lg ${disabledInput}`}
               />
+              <p className="text-xs text-on-surface-variant mt-1">
+                Must already be an approved sender ID on your Kairos Africa account.
+              </p>
             </div>
             <div>
               <label className="text-xs text-on-surface-variant block mb-1">API Access Key</label>

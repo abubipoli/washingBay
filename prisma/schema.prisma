@@ -197,8 +197,9 @@ model BusinessSettings {
 
   // SMS provider config, editable from Settings instead of only via .env.
   // Empty/null fields fall back to the matching env var (see src/lib/sms).
+  // Kairos Africa's API host is fixed (https://api.kairosafrika.com/v1),
+  // so unlike the key/secret there's no per-business base URL to store.
   smsProvider       String  @default("console")
-  kairosBaseUrl     String?
   // Kairos Africa authenticates with a Key + Secret pair (see their
   // dashboard's "API Access Credential" panel), not a single API key.
   kairosAccessKey   String?

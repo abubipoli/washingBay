@@ -59,7 +59,6 @@ export default async function SettingsPage() {
       <SmsSettingsForm
         initial={{
           smsProvider: settings.smsProvider,
-          kairosBaseUrl: settings.kairosBaseUrl,
           kairosAccessKey: settings.kairosAccessKey,
           kairosAccessSecret: settings.kairosAccessSecret,
           kairosSenderId: settings.kairosSenderId,

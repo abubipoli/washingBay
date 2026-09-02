@@ -6,7 +6,6 @@ import { getSmsProviderFromSettings } from "@/lib/sms";
 const testSmsSchema = z.object({
   phone: z.string().trim().min(6).max(20),
   smsProvider: z.enum(["console", "kairos"]),
-  kairosBaseUrl: z.string().trim().optional().or(z.literal("")),
   kairosAccessKey: z.string().trim().optional().or(z.literal("")),
   kairosAccessSecret: z.string().trim().optional().or(z.literal("")),
   kairosSenderId: z.string().trim().optional().or(z.literal("")),
@@ -29,7 +28,6 @@ export async function POST(req: NextRequest) {
 
   const provider = getSmsProviderFromSettings({
     smsProvider: parsed.data.smsProvider,
-    kairosBaseUrl: parsed.data.kairosBaseUrl || null,
     kairosAccessKey: parsed.data.kairosAccessKey || null,
     kairosAccessSecret: parsed.data.kairosAccessSecret || null,
     kairosSenderId: parsed.data.kairosSenderId || null,

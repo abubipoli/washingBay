@@ -123,23 +123,24 @@ Every wash receipt is also printable from the Revenue Recording table
 
 ### Wiring up Kairos Africa for real SMS
 
-`src/lib/sms/kairos-provider.ts` is a best-effort adapter (REST + HTTP Basic
-Auth using Kairos's Key + Secret pair) written without access to Kairos
-Africa's actual API reference. Their dashboard's "API Access Credential"
-panel gives you an **Access Key** and **Access Secret** — enter both in
-Settings > SMS Notifications (or as `KAIROS_ACCESS_KEY` /
-`KAIROS_ACCESS_SECRET` in `.env` as a fallback). Once you have their real
-docs:
+`src/lib/sms/kairos-provider.ts` mirrors the contract used by Kairos
+Africa's own official SDK (`@kairosafrika/sms`, github.com/Kairos-Afrika/sms-node)
+since their public site doesn't document the REST API directly:
 
-1. Set the provider to Kairos Africa in Settings (or `SMS_PROVIDER=kairos`
-   in `.env`), and fill in the Base URL, Access Key, Access Secret, and
-   Sender ID.
-2. Open `src/lib/sms/kairos-provider.ts` and adjust the endpoint path, the
-   auth scheme (it currently assumes Basic Auth over the key/secret — adjust
-   if Kairos actually wants something else, e.g. both in the JSON body or an
-   HMAC signature), and the request/response JSON shape to match their real
-   contract. Nothing else in the app needs to change — everything talks to
-   the `SmsProvider` interface.
+- Fixed API host: `https://api.kairosafrika.com/v1` (not configurable —
+  there's only one).
+- Auth via `x-api-key` / `x-api-secret` headers (not Basic Auth).
+- Send: `POST /external/sms/quick` with `{ to, from, message }`.
+- Balance: `GET /external/account/balance`, credit amount in `data.credit`.
+
+Their dashboard's "API Access Credential" panel gives you an **Access Key**
+and **Access Secret** — enter both in Settings > SMS Notifications (or as
+`KAIROS_ACCESS_KEY` / `KAIROS_ACCESS_SECRET` in `.env` as a fallback), along
+with a **Sender ID** that must already be approved on your Kairos account.
+Settings also has "Send Test" and "Check Balance" buttons to verify
+credentials work before relying on them for real payouts. If Kairos changes
+their contract, `src/lib/sms/kairos-provider.ts` is the only file that needs
+updating — everything else in the app talks to the `SmsProvider` interface.
 
 ## Installing as a mobile app (PWA)
 

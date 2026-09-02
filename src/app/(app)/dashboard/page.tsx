@@ -174,7 +174,7 @@ export default async function DashboardPage({
               </div>
             ))}
             <Link
-              href="/settings"
+              href="/expenses"
               className="mt-auto text-primary hover:text-primary-fixed-dim text-label-caps font-label-caps font-medium transition-colors"
             >
               Manage expenses →

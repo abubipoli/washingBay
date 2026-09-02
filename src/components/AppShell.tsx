@@ -41,12 +41,9 @@ export function AppShell({
 
   const nav = (
     <>
-      <div className="p-gutter border-b border-outline-variant/30 flex items-center gap-3">
-        <Image src="/brand/logo-emblem.png" alt={businessName} width={66} height={44} className="shrink-0" />
-        <div className="min-w-0">
-          <h1 className="text-base leading-tight font-headline-md font-bold text-primary break-words">{businessName}</h1>
-          <p className="text-label-caps font-label-caps text-on-surface-variant truncate">Management System</p>
-        </div>
+      <div className="p-gutter border-b border-outline-variant/30 flex flex-col items-center gap-2">
+        <Image src="/brand/logo-emblem.png" alt={businessName} width={180} height={120} className="shrink-0" />
+        <p className="text-label-caps font-label-caps text-on-surface-variant">Management System</p>
       </div>
       <nav className="flex-1 overflow-y-auto p-gutter flex flex-col gap-2">
         {NAV_ITEMS.map((item) => {

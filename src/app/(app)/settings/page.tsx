@@ -6,6 +6,7 @@ import { ServiceTypeManager } from "@/components/settings/ServiceTypeManager";
 import { BusinessSettingsForm } from "@/components/settings/BusinessSettingsForm";
 import { SmsSettingsForm } from "@/components/settings/SmsSettingsForm";
 import { CustomerManager } from "@/components/settings/CustomerManager";
+import { UserManager } from "@/components/settings/UserManager";
 
 export const dynamic = "force-dynamic";
 
@@ -13,11 +14,17 @@ export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
   const isOwner = session?.user.role === "OWNER";
 
-  const [staff, serviceTypes, settings, customers] = await Promise.all([
+  const [staff, serviceTypes, settings, customers, users] = await Promise.all([
     prisma.staff.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }] }),
     prisma.serviceType.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
     prisma.businessSettings.upsert({ where: { id: "default" }, update: {}, create: { id: "default" } }),
     prisma.customer.findMany({ orderBy: [{ active: "desc" }, { name: "asc" }] }),
+    isOwner
+      ? prisma.user.findMany({
+          orderBy: [{ active: "desc" }, { name: "asc" }],
+          select: { id: true, name: true, email: true, role: true, active: true },
+        })
+      : Promise.resolve([]),
   ]);
 
   const currency = settings.currency;
@@ -73,6 +80,8 @@ export default async function SettingsPage() {
       <CustomerManager
         customers={customers.map((c) => ({ id: c.id, name: c.name, phone: c.phone, notes: c.notes, active: c.active }))}
       />
+
+      {isOwner && <UserManager users={users} currentUserId={session!.user.id} />}
     </div>
   );
 }

@@ -108,6 +108,20 @@ export const createPayoutSchema = z.object({
   notify: z.enum(["SMS", "RECEIPT_PRINT", "NONE"]).default("NONE"),
 });
 
+export const createUserSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(["OWNER", "MANAGER"]),
+});
+
+export const updateUserSchema = z.object({
+  name: z.string().trim().min(2).max(80).optional(),
+  role: z.enum(["OWNER", "MANAGER"]).optional(),
+  active: z.boolean().optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional(),
+});
+
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),

@@ -48,14 +48,6 @@ export default async function WashReceiptPage({ params }: { params: { id: string
           <Row label="Status" value={wash.status} />
         </dl>
 
-        <div className="border-t border-dashed border-outline-variant my-4" />
-
-        <dl className="space-y-1 text-sm">
-          <Row label="Business Share" value={formatMoney(wash.amountBusiness, currency)} />
-          <Row label="Washing Boy Share" value={formatMoney(wash.amountStaff, currency)} />
-          <Row label="Soap Share" value={formatMoney(wash.amountSoap, currency)} />
-        </dl>
-
         <div className="border-t border-outline-variant my-4" />
 
         <div className="flex justify-between text-headline-md font-headline-md font-bold text-on-surface">

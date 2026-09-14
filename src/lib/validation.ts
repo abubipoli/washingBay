@@ -67,25 +67,6 @@ export const updateCustomerSchema = createCustomerSchema.partial().extend({
   active: z.boolean().optional(),
 });
 
-export const createServiceTypeSchema = z
-  .object({
-    name: z.string().trim().min(2).max(60),
-    defaultPrice: money,
-    // Decimal, not integer: an even three-way split is 33.33...%, which a
-    // whole-number percent can't represent without losing a cent on totals
-    // not divisible by 3. See prisma/schema.prisma for the same note.
-    defaultBusinessPct: z.coerce.number().min(0).max(100),
-    defaultStaffPct: z.coerce.number().min(0).max(100),
-    defaultSoapPct: z.coerce.number().min(0).max(100),
-  })
-  .refine(
-    (d) => {
-      const sum = d.defaultBusinessPct + d.defaultStaffPct + d.defaultSoapPct;
-      return Math.abs(sum - 100) < 0.01;
-    },
-    { message: "Split percentages must add up to 100", path: ["defaultBusinessPct"] }
-  );
-
 export const createExpenseSchema = z.object({
   category: z.enum([
     "ELECTRICITY",

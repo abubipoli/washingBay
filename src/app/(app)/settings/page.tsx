@@ -65,6 +65,7 @@ export default async function SettingsPage() {
           kairosAccessSecret: settings.kairosAccessSecret,
           kairosSenderId: settings.kairosSenderId,
           payoutSmsTemplate: settings.payoutSmsTemplate,
+          customerSmsTemplate: settings.customerSmsTemplate,
         }}
         isOwner={isOwner}
       />

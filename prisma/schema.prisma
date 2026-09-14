@@ -90,8 +90,8 @@ model Staff {
   @@index([active])
 }
 
-// A customer contact for direct/bulk SMS notices (promos, reminders) —
-// unrelated to WashRecord, which tracks jobs by vehicle plate, not customer.
+// A customer contact for direct/bulk SMS notices (promos, reminders), and
+// optionally linked to the washes they've brought in (see WashRecord).
 model Customer {
   id        String   @id @default(cuid())
   name      String
@@ -100,6 +100,8 @@ model Customer {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  washRecords WashRecord[]
 
   @@index([active])
 }
@@ -137,6 +139,12 @@ model WashRecord {
   staff   Staff  @relation(fields: [staffId], references: [id], onDelete: Restrict)
   staffId String
 
+  // Who the job was for, if the manager took down a contact — matched or
+  // created by phone number in the Customers list (see Settings). Optional:
+  // most walk-in washes never need it.
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId String?
+
   totalAmount    Decimal @db.Decimal(10, 2)
   amountBusiness Decimal @db.Decimal(10, 2)
   amountStaff    Decimal @db.Decimal(10, 2)
@@ -159,6 +167,7 @@ model WashRecord {
   @@index([staffId, createdAt])
   @@index([status])
   @@index([payoutId])
+  @@index([customerId])
 }
 
 model Expense {
@@ -223,6 +232,11 @@ model BusinessSettings {
   // {{washCount}}, {{periodLabel}}, {{businessName}} placeholders — see
   // buildPayoutSmsMessage(). Null uses the built-in default message.
   payoutSmsTemplate String?
+  // Editable wash-confirmation SMS sent to a customer (not the washing
+  // boy) when a manager records their wash and opts to notify them.
+  // Supports {{customerName}}, {{businessName}}, {{vehiclePlate}},
+  // {{serviceLabel}}, {{amount}} — see buildCustomerSmsMessage().
+  customerSmsTemplate String?
 
   updatedAt    DateTime @updatedAt
 }

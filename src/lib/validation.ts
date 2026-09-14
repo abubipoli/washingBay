@@ -16,6 +16,14 @@ export const createWashSchema = z
     amountStaff: money,
     amountSoap: money,
     notes: z.string().trim().max(500).optional().or(z.literal("")),
+    customerName: z.string().trim().max(80).optional().or(z.literal("")),
+    customerPhone: z
+      .string()
+      .trim()
+      .regex(/^\+?[0-9]{9,15}$/, "Enter a valid phone number, e.g. +233201234567")
+      .optional()
+      .or(z.literal("")),
+    notifyCustomer: z.boolean().optional(),
   })
   .refine(
     (data) =>

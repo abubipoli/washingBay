@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/api-guard";
 import { createWashSchema } from "@/lib/validation";
+import { formatMoney } from "@/lib/money";
+import { buildCustomerSmsMessage, getSmsProviderFromSettings } from "@/lib/sms";
 import type { WashStatus } from "@prisma/client";
 
 const WASH_STATUSES: WashStatus[] = ["QUEUED", "WASHING", "DETAILING", "COMPLETED", "CANCELLED"];
@@ -57,6 +59,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Selected washing boy is not available" }, { status: 400 });
   }
 
+  // Match or create the customer by phone — the Customers list (Settings)
+  // grows on its own as new phone numbers come through here, same contact
+  // record whether they were added by hand or picked up from a wash.
+  let customerId: string | null = null;
+  const customerPhone = data.customerPhone?.trim();
+  if (customerPhone) {
+    const existing = await prisma.customer.findUnique({ where: { phone: customerPhone } });
+    customerId = existing
+      ? existing.id
+      : (
+          await prisma.customer.create({
+            data: { name: data.customerName?.trim() || "Customer", phone: customerPhone },
+          })
+        ).id;
+  }
+
   const wash = await prisma.washRecord.create({
     data: {
       vehiclePlate: data.vehiclePlate.toUpperCase(),
@@ -65,6 +83,7 @@ export async function POST(req: NextRequest) {
       serviceLabel: data.serviceLabel,
       serviceTypeId: data.serviceTypeId ?? null,
       staffId: data.staffId,
+      customerId,
       totalAmount: data.totalAmount,
       amountBusiness: data.amountBusiness,
       amountStaff: data.amountStaff,
@@ -72,8 +91,25 @@ export async function POST(req: NextRequest) {
       notes: data.notes || null,
       recordedById: session!.user.id,
     },
-    include: { staff: true, serviceType: true },
+    include: { staff: true, serviceType: true, customer: true },
   });
+
+  if (data.notifyCustomer && wash.customer) {
+    const settings = await prisma.businessSettings.upsert({
+      where: { id: "default" },
+      update: {},
+      create: { id: "default" },
+    });
+    const message = buildCustomerSmsMessage({
+      customerName: wash.customer.name,
+      vehiclePlate: wash.vehiclePlate,
+      serviceLabel: wash.serviceLabel,
+      amount: formatMoney(wash.totalAmount, settings.currency),
+      businessName: settings.businessName,
+      template: settings.customerSmsTemplate,
+    });
+    await getSmsProviderFromSettings(settings).sendSms(wash.customer.phone, message);
+  }
 
   return NextResponse.json(wash, { status: 201 });
 }

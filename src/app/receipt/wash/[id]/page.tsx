@@ -10,7 +10,7 @@ export default async function WashReceiptPage({ params }: { params: { id: string
   const [wash, settings] = await Promise.all([
     prisma.washRecord.findUnique({
       where: { id: params.id },
-      include: { staff: true, recordedBy: true },
+      include: { staff: true, recordedBy: true, customer: true },
     }),
     prisma.businessSettings.findUnique({ where: { id: "default" } }),
   ]);
@@ -42,6 +42,7 @@ export default async function WashReceiptPage({ params }: { params: { id: string
           <Row label="Date" value={wash.createdAt.toLocaleString()} />
           <Row label="Vehicle Number" value={wash.vehiclePlate} />
           {wash.vehicleMake && <Row label="Make / Model" value={wash.vehicleMake} />}
+          {wash.customer && <Row label="Customer" value={`${wash.customer.name} (${wash.customer.phone})`} />}
           <Row label="Service" value={wash.serviceLabel} />
           <Row label="Washed By" value={wash.staff.name} />
           <Row label="Status" value={wash.status} />

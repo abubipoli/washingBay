@@ -66,3 +66,34 @@ export function buildPayoutSmsMessage(params: {
     .replaceAll("{{periodLabel}}", params.periodLabel)
     .replaceAll("{{businessName}}", params.businessName);
 }
+
+export const DEFAULT_CUSTOMER_SMS_TEMPLATE =
+  "{{businessName}}: Hi {{customerName}}, thank you for washing your vehicle ({{vehiclePlate}}) with us today — {{serviceLabel}}, {{amount}}. We hope to see you again soon!";
+
+export const CUSTOMER_SMS_PLACEHOLDERS = [
+  "{{customerName}}",
+  "{{vehiclePlate}}",
+  "{{serviceLabel}}",
+  "{{amount}}",
+  "{{businessName}}",
+] as const;
+
+/** Fills in the customer-facing wash-confirmation template — same
+ * {{placeholder}} substitution as buildPayoutSmsMessage, just a different
+ * default wording and a different audience (the customer, not the boy). */
+export function buildCustomerSmsMessage(params: {
+  customerName: string;
+  vehiclePlate: string;
+  serviceLabel: string;
+  amount: string;
+  businessName: string;
+  template?: string | null;
+}): string {
+  const template = params.template?.trim() || DEFAULT_CUSTOMER_SMS_TEMPLATE;
+  return template
+    .replaceAll("{{customerName}}", params.customerName)
+    .replaceAll("{{vehiclePlate}}", params.vehiclePlate)
+    .replaceAll("{{serviceLabel}}", params.serviceLabel)
+    .replaceAll("{{amount}}", params.amount)
+    .replaceAll("{{businessName}}", params.businessName);
+}

@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PasswordInput } from "@/components/PasswordInput";
-import { buildPayoutSmsMessage, DEFAULT_PAYOUT_SMS_TEMPLATE, PAYOUT_SMS_PLACEHOLDERS } from "@/lib/sms";
+import {
+  buildPayoutSmsMessage,
+  buildCustomerSmsMessage,
+  DEFAULT_PAYOUT_SMS_TEMPLATE,
+  DEFAULT_CUSTOMER_SMS_TEMPLATE,
+  PAYOUT_SMS_PLACEHOLDERS,
+  CUSTOMER_SMS_PLACEHOLDERS,
+} from "@/lib/sms";
 
 export function SmsSettingsForm({
   initial,
@@ -15,6 +22,7 @@ export function SmsSettingsForm({
     kairosAccessSecret: string | null;
     kairosSenderId: string | null;
     payoutSmsTemplate: string | null;
+    customerSmsTemplate: string | null;
   };
   isOwner: boolean;
 }) {
@@ -24,6 +32,9 @@ export function SmsSettingsForm({
   const [accessSecret, setAccessSecret] = useState(initial.kairosAccessSecret ?? "");
   const [senderId, setSenderId] = useState(initial.kairosSenderId ?? "");
   const [template, setTemplate] = useState(initial.payoutSmsTemplate ?? DEFAULT_PAYOUT_SMS_TEMPLATE);
+  const [customerTemplate, setCustomerTemplate] = useState(
+    initial.customerSmsTemplate ?? DEFAULT_CUSTOMER_SMS_TEMPLATE
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +104,7 @@ export function SmsSettingsForm({
         kairosAccessSecret: accessSecret,
         kairosSenderId: senderId,
         payoutSmsTemplate: template,
+        customerSmsTemplate: customerTemplate,
       }),
     });
     setSaving(false);
@@ -112,6 +124,15 @@ export function SmsSettingsForm({
     periodLabel: new Date().toLocaleDateString("en-GB"),
     businessName: "First Class Washing Bay",
     template,
+  });
+
+  const customerPreview = buildCustomerSmsMessage({
+    customerName: "Ama K.",
+    vehiclePlate: "GR 1234-24",
+    serviceLabel: "Washing",
+    amount: "GHS 30.00",
+    businessName: "First Class Washing Bay",
+    template: customerTemplate,
   });
 
   const disabledInput = "disabled:bg-surface-container-low disabled:text-on-surface-variant";
@@ -256,6 +277,42 @@ export function SmsSettingsForm({
           <div className="mt-2 bg-surface-container-low rounded-lg px-3 py-2">
             <p className="text-xs text-on-surface-variant mb-1">Preview (sample data):</p>
             <p className="text-sm text-on-surface">{preview}</p>
+          </div>
+        </div>
+
+        <div className="sm:col-span-2 border-t border-outline-variant pt-4">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-xs text-on-surface-variant" htmlFor="customerSmsTemplate">
+              Customer Wash Confirmation SMS
+            </label>
+            {isOwner && customerTemplate !== DEFAULT_CUSTOMER_SMS_TEMPLATE && (
+              <button
+                type="button"
+                onClick={() => setCustomerTemplate(DEFAULT_CUSTOMER_SMS_TEMPLATE)}
+                className="text-primary text-xs underline"
+              >
+                Reset to default
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-on-surface-variant mb-1">
+            Sent to a customer (not the washing boy) when a manager records their wash and checks &ldquo;Send
+            confirmation SMS to customer&rdquo;.
+          </p>
+          <textarea
+            id="customerSmsTemplate"
+            disabled={!isOwner}
+            value={customerTemplate}
+            onChange={(e) => setCustomerTemplate(e.target.value)}
+            rows={3}
+            className={`w-full px-3 py-2 border border-[#D0D5DD] rounded-lg font-data-tabular text-sm ${disabledInput}`}
+          />
+          <p className="text-xs text-on-surface-variant mt-1">
+            Placeholders you can use: {CUSTOMER_SMS_PLACEHOLDERS.join(", ")}
+          </p>
+          <div className="mt-2 bg-surface-container-low rounded-lg px-3 py-2">
+            <p className="text-xs text-on-surface-variant mb-1">Preview (sample data):</p>
+            <p className="text-sm text-on-surface">{customerPreview}</p>
           </div>
         </div>
 

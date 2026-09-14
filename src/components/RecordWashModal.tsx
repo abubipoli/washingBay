@@ -63,6 +63,9 @@ export function RecordWashModal({
   const [soap, setSoap] = useState("0");
   const [splitTouched, setSplitTouched] = useState(false);
   const [notes, setNotes] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [notifyCustomer, setNotifyCustomer] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedWashId, setSavedWashId] = useState<string | null>(null);
@@ -100,6 +103,9 @@ export function RecordWashModal({
     setServiceLabel(first?.name ?? "");
     setStaffId(staff[0]?.id ?? "");
     setNotes("");
+    setCustomerName("");
+    setCustomerPhone("");
+    setNotifyCustomer(false);
     setSplitTouched(false);
     setError(null);
     setSavedWashId(null);
@@ -177,6 +183,9 @@ export function RecordWashModal({
       amountStaff: Number(staffCut),
       amountSoap: Number(soap),
       notes: notes || undefined,
+      customerName: customerName || undefined,
+      customerPhone: customerPhone || undefined,
+      notifyCustomer: notifyCustomer && !!customerPhone,
     };
 
     setSubmitting(true);
@@ -244,6 +253,9 @@ export function RecordWashModal({
               check_circle
             </span>
             <h3 className="text-headline-md font-headline-md">Wash recorded!</h3>
+            {notifyCustomer && customerPhone && (
+              <p className="text-sm text-success">A confirmation SMS was sent to {customerName || "the customer"}.</p>
+            )}
             <p className="text-on-surface-variant">What would you like to do next?</p>
             <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
               <button
@@ -304,6 +316,45 @@ export function RecordWashModal({
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass} htmlFor="customerName">Customer Name (optional)</label>
+                <input
+                  id="customerName"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="e.g. Ama Kufuor"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass} htmlFor="customerPhone">Customer Contact (optional)</label>
+                <input
+                  id="customerPhone"
+                  value={customerPhone}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCustomerPhone(value);
+                    if (value && !customerPhone) setNotifyCustomer(true);
+                    if (!value) setNotifyCustomer(false);
+                  }}
+                  placeholder="+233201234567"
+                  className={`${inputClass} font-data-tabular`}
+                />
+              </div>
+            </div>
+
+            {customerPhone && (
+              <label className="flex items-center gap-2 text-sm text-on-surface-variant -mt-2">
+                <input
+                  type="checkbox"
+                  checked={notifyCustomer}
+                  onChange={(e) => setNotifyCustomer(e.target.checked)}
+                />
+                Send confirmation SMS to customer when saved
+              </label>
+            )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

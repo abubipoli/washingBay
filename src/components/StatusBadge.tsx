@@ -3,7 +3,6 @@ import type { WashStatus } from "@prisma/client";
 const STYLES: Record<WashStatus, string> = {
   QUEUED: "bg-surface-container-highest text-on-surface",
   WASHING: "bg-primary/10 text-primary",
-  DETAILING: "bg-secondary-container text-on-secondary-container",
   COMPLETED: "bg-success/10 text-success",
   CANCELLED: "bg-error-container text-on-error-container",
 };
@@ -11,7 +10,6 @@ const STYLES: Record<WashStatus, string> = {
 const LABELS: Record<WashStatus, string> = {
   QUEUED: "Queueing",
   WASHING: "Washing",
-  DETAILING: "Detailing",
   COMPLETED: "Completed",
   CANCELLED: "Cancelled",
 };

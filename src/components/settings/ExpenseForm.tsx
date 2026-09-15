@@ -21,6 +21,7 @@ const CATEGORIES = [
   { value: "MAINTENANCE", label: "Maintenance" },
   { value: "SALARY", label: "Manager Salary" },
   { value: "RENT", label: "Rent" },
+  { value: "FOOD", label: "Food" },
   { value: "OTHER", label: "Other" },
 ];
 

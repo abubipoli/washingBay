@@ -38,7 +38,7 @@ export default async function DailyCommissionPage({
     // forgot to update status would otherwise just see an empty page and
     // wonder where the day's work went.
     prisma.washRecord.count({
-      where: { createdAt: { gte: from, lte: to }, status: { in: ["QUEUED", "WASHING", "DETAILING"] } },
+      where: { createdAt: { gte: from, lte: to }, status: { in: ["QUEUED", "WASHING"] } },
     }),
   ]);
 
@@ -103,7 +103,7 @@ export default async function DailyCommissionPage({
         <div className="flex items-center gap-3 bg-warning/10 border border-warning/30 rounded-xl px-4 py-3 text-sm">
           <span className="material-symbols-outlined text-warning">info</span>
           <span className="text-on-surface">
-            {inProgressCount} wash{inProgressCount === 1 ? " is" : "es are"} still Queueing/Washing/Detailing today —
+            {inProgressCount} wash{inProgressCount === 1 ? " is" : "es are"} still Queueing/Washing today —
             they won&rsquo;t show up here until marked <strong>Completed</strong>.
           </span>
           <Link href="/revenue" className="text-primary underline ml-auto whitespace-nowrap">

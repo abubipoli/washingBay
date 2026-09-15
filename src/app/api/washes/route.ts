@@ -6,7 +6,7 @@ import { formatMoney } from "@/lib/money";
 import { buildCustomerSmsMessage, getSmsProviderFromSettings } from "@/lib/sms";
 import type { WashStatus } from "@prisma/client";
 
-const WASH_STATUSES: WashStatus[] = ["QUEUED", "WASHING", "DETAILING", "COMPLETED", "CANCELLED"];
+const WASH_STATUSES: WashStatus[] = ["QUEUED", "WASHING", "COMPLETED", "CANCELLED"];
 function parseWashStatus(value: string | null): WashStatus | undefined {
   return WASH_STATUSES.find((s) => s === value);
 }

@@ -45,7 +45,7 @@ export const createWashSchema = z
 export type CreateWashInput = z.infer<typeof createWashSchema>;
 
 export const updateWashStatusSchema = z.object({
-  status: z.enum(["QUEUED", "WASHING", "DETAILING", "COMPLETED", "CANCELLED"]),
+  status: z.enum(["QUEUED", "WASHING", "COMPLETED", "CANCELLED"]),
 });
 
 export const createStaffSchema = z.object({
@@ -82,6 +82,7 @@ export const createExpenseSchema = z.object({
     "MAINTENANCE",
     "SALARY",
     "RENT",
+    "FOOD",
     "OTHER",
   ]),
   amount: money.positive("Amount must be greater than zero"),

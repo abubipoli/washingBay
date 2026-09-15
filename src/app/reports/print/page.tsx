@@ -13,6 +13,7 @@ const EXPENSE_LABELS: Record<string, string> = {
   MAINTENANCE: "Maintenance",
   SALARY: "Salary",
   RENT: "Rent",
+  FOOD: "Food",
   OTHER: "Other",
 };
 

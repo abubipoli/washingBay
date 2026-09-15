@@ -7,7 +7,6 @@ import type { WashStatus } from "@prisma/client";
 const OPTIONS: { value: WashStatus; label: string }[] = [
   { value: "QUEUED", label: "Queueing" },
   { value: "WASHING", label: "Washing" },
-  { value: "DETAILING", label: "Detailing" },
   { value: "COMPLETED", label: "Completed" },
   { value: "CANCELLED", label: "Cancelled" },
 ];

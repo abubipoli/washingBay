@@ -11,7 +11,7 @@ import type { WashStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-const WASH_STATUSES: WashStatus[] = ["QUEUED", "WASHING", "DETAILING", "COMPLETED", "CANCELLED"];
+const WASH_STATUSES: WashStatus[] = ["QUEUED", "WASHING", "COMPLETED", "CANCELLED"];
 function parseWashStatus(value: string | undefined): WashStatus | undefined {
   return WASH_STATUSES.find((s) => s === value);
 }
@@ -90,7 +90,6 @@ export default async function RevenuePage({
                 <option value="">All statuses</option>
                 <option value="QUEUED">Queueing</option>
                 <option value="WASHING">Washing</option>
-                <option value="DETAILING">Detailing</option>
                 <option value="COMPLETED">Completed</option>
                 <option value="CANCELLED">Cancelled</option>
               </select>

@@ -15,6 +15,7 @@ const EXPENSE_COLORS: Record<string, string> = {
   MAINTENANCE: "bg-outline",
   SALARY: "bg-tertiary",
   RENT: "bg-secondary",
+  FOOD: "bg-[#F97316]",
   OTHER: "bg-on-surface-variant",
 };
 const EXPENSE_LABELS: Record<string, string> = {
@@ -24,6 +25,7 @@ const EXPENSE_LABELS: Record<string, string> = {
   MAINTENANCE: "Maintenance",
   SALARY: "Salary",
   RENT: "Rent",
+  FOOD: "Food",
   OTHER: "Other",
 };
 

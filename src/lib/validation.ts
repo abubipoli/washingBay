@@ -7,6 +7,13 @@ export const createWashSchema = z
   .object({
     vehiclePlate: z.string().trim().min(2, "Vehicle number is required").max(20),
     vehicleMake: z.string().trim().max(60).optional().or(z.literal("")),
+    // Lets a manager backdate a job entered late (e.g. recorded the next
+    // morning) instead of it always landing under today. Optional — omitting
+    // it falls back to the server's own `now()` at creation time.
+    date: z
+      .coerce.date()
+      .refine((d) => d.getTime() <= Date.now() + 5 * 60 * 1000, "Date can't be in the future")
+      .optional(),
     vehicleType: z.enum(["CAR", "SUV", "TRUCK", "BUS", "MOTORBIKE", "VAN", "OTHER"]),
     serviceTypeId: z.string().cuid().optional().nullable(),
     serviceLabel: z.string().trim().min(2, "Service name is required").max(80),

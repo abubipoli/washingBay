@@ -33,6 +33,28 @@ function hasDefaultSplit(service: ServiceType | undefined): boolean {
   return !!service && service.defaultBusinessPct + service.defaultStaffPct + service.defaultSoapPct > 0;
 }
 
+/** Local (not UTC) YYYY-MM-DD, since a plain `toISOString().slice(0,10)`
+ * would show yesterday's date for anyone west of UTC in the evening. */
+function todayLocalDateStr(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+/** Combines a YYYY-MM-DD picked date with right-now's time-of-day, so a
+ * backdated wash still sorts sensibly among same-day jobs instead of
+ * collapsing to midnight. */
+function combineDateWithCurrentTime(dateStr: string): Date {
+  const now = new Date();
+  const parts = dateStr.split("-").map(Number);
+  const year = parts[0] ?? now.getFullYear();
+  const month = parts[1] ?? now.getMonth() + 1;
+  const day = parts[2] ?? now.getDate();
+  return new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+}
+
 const inputClass =
   "w-full px-4 py-2 border border-[#D0D5DD] rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-surface-container-lowest";
 const labelClass = "text-label-caps font-label-caps text-on-surface-variant block mb-1";
@@ -62,6 +84,7 @@ export function RecordWashModal({
 
   const [vehiclePlate, setVehiclePlate] = useState("");
   const [vehicleMake, setVehicleMake] = useState("");
+  const [date, setDate] = useState(todayLocalDateStr());
   const [vehicleType, setVehicleType] = useState("CAR");
   const [serviceTypeId, setServiceTypeId] = useState("");
   const [serviceLabel, setServiceLabel] = useState("");
@@ -107,6 +130,7 @@ export function RecordWashModal({
     const first = serviceTypes[0];
     setVehiclePlate("");
     setVehicleMake("");
+    setDate(todayLocalDateStr());
     setVehicleType("CAR");
     setServiceTypeId(first?.id ?? "");
     setServiceLabel(first?.name ?? "");
@@ -183,6 +207,7 @@ export function RecordWashModal({
     const payload = {
       vehiclePlate,
       vehicleMake: vehicleMake || undefined,
+      date: combineDateWithCurrentTime(date).toISOString(),
       vehicleType,
       serviceTypeId: serviceTypeId || undefined,
       serviceLabel,
@@ -233,7 +258,7 @@ export function RecordWashModal({
         if (e.target === e.currentTarget && !submitting) onClose();
       }}
     >
-      <div className="bg-surface-container-lowest rounded-xl shadow-level-2 w-full max-w-lg max-h-[90vh] overflow-y-auto p-card-padding">
+      <div className="bg-surface-container-lowest rounded-xl shadow-level-2 w-full max-w-xl max-h-[90vh] overflow-y-auto p-card-padding">
         {savedOffline ? (
           <div className="flex flex-col items-center text-center gap-4 py-4">
             <span className="material-symbols-outlined text-primary" style={{ fontSize: 48 }}>
@@ -324,6 +349,22 @@ export function RecordWashModal({
                   className={inputClass}
                 />
               </div>
+            </div>
+
+            <div>
+              <label className={labelClass} htmlFor="washDate">Date *</label>
+              <input
+                id="washDate"
+                type="date"
+                required
+                max={todayLocalDateStr()}
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className={`${inputClass} font-data-tabular`}
+              />
+              <p className="text-xs text-on-surface-variant mt-1">
+                Defaults to today — change it to backdate a job you're entering late.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

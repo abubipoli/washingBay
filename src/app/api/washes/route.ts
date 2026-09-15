@@ -100,6 +100,9 @@ export async function POST(req: NextRequest) {
       amountSoap: data.amountSoap,
       notes: data.notes || null,
       recordedById: session!.user.id,
+      // Backdating a job (e.g. entered the morning after) sets createdAt
+      // directly — omitted, it falls back to the column's own now() default.
+      ...(data.date ? { createdAt: data.date } : {}),
     },
     include: { staff: true, serviceType: true, customer: true },
   });

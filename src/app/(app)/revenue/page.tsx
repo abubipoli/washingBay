@@ -24,7 +24,7 @@ export default async function RevenuePage({
   const session = await getServerSession(authOptions);
   const isOwner = session?.user.role === "OWNER";
 
-  const [serviceTypes, staff, allServiceTypes, allStaff, settings, washes] = await Promise.all([
+  const [serviceTypes, staff, allServiceTypes, allStaff, customers, settings, washes] = await Promise.all([
     // createdAt, not name — "Others" sorts before "Washing" alphabetically,
     // but Washing is the common case and should be the default selection.
     prisma.serviceType.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
@@ -34,6 +34,8 @@ export default async function RevenuePage({
     // value in the edit dropdown, not silently fall back to something else.
     prisma.serviceType.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.staff.findMany({ orderBy: { name: "asc" } }),
+    // For auto-filling a returning customer's name by phone in Record a Wash.
+    prisma.customer.findMany({ select: { id: true, name: true, phone: true } }),
     prisma.businessSettings.findUnique({ where: { id: "default" } }),
     prisma.washRecord.findMany({
       where: {
@@ -71,7 +73,7 @@ export default async function RevenuePage({
             Record every vehicle washed, split the payment three ways, and track it through completion.
           </p>
         </div>
-        <RevenueRecordingArea serviceTypes={serviceTypeOptions} staff={staff} currency={currency} />
+        <RevenueRecordingArea serviceTypes={serviceTypeOptions} staff={staff} customers={customers} currency={currency} />
       </div>
 
       <div className="bg-surface-container-lowest rounded-xl shadow-level-1 overflow-hidden">

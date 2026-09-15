@@ -14,6 +14,7 @@ type ServiceType = {
   defaultSoapPct: number;
 };
 type StaffOption = { id: string; name: string };
+type CustomerOption = { id: string; name: string; phone: string };
 
 const VEHICLE_TYPES = [
   { value: "CAR", label: "Car" },
@@ -41,15 +42,23 @@ export function RecordWashModal({
   onClose,
   serviceTypes,
   staff,
+  customers,
   currency,
 }: {
   open: boolean;
   onClose: () => void;
   serviceTypes: ServiceType[];
   staff: StaffOption[];
+  customers: CustomerOption[];
   currency: string;
 }) {
   const router = useRouter();
+
+  const customerByPhone = useMemo(() => {
+    const map = new Map<string, CustomerOption>();
+    for (const c of customers) map.set(c.phone.trim(), c);
+    return map;
+  }, [customers]);
 
   const [vehiclePlate, setVehiclePlate] = useState("");
   const [vehicleMake, setVehicleMake] = useState("");
@@ -338,10 +347,15 @@ export function RecordWashModal({
                     setCustomerPhone(value);
                     if (value && !customerPhone) setNotifyCustomer(true);
                     if (!value) setNotifyCustomer(false);
+                    const match = customerByPhone.get(value.trim());
+                    if (match) setCustomerName(match.name);
                   }}
                   placeholder="+233201234567"
                   className={`${inputClass} font-data-tabular`}
                 />
+                {customerByPhone.has(customerPhone.trim()) && (
+                  <p className="text-xs text-success mt-1">Existing customer — name filled in automatically.</p>
+                )}
               </div>
             </div>
 

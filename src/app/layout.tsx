@@ -30,6 +30,15 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // The service worker's cache-first strategy for _next/static/* is exactly
+  // wrong for `npm run dev`: dev chunk URLs don't change per edit the way
+  // production's content-hashed ones do, so once cached the browser can
+  // silently keep serving yesterday's JS forever regardless of code changes
+  // — confusing to debug since nothing errors, code just doesn't run. Only
+  // register it in production, and proactively unregister + clear caches in
+  // dev so a machine that had it registered before this fix self-heals.
+  const isProd = process.env.NODE_ENV === "production";
+
   return (
     <html lang="en" className={inter.variable}>
       <head>
@@ -44,11 +53,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <script
           dangerouslySetInnerHTML={{
-            __html: `
+            __html: isProd
+              ? `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').catch(() => {});
                 });
+              }
+            `
+              : `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then((regs) => {
+                  regs.forEach((r) => r.unregister());
+                });
+              }
+              if ('caches' in window) {
+                caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
               }
             `,
           }}

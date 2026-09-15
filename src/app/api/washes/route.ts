@@ -61,18 +61,28 @@ export async function POST(req: NextRequest) {
 
   // Match or create the customer by phone — the Customers list (Settings)
   // grows on its own as new phone numbers come through here, same contact
-  // record whether they were added by hand or picked up from a wash.
+  // record whether they were added by hand or picked up from a wash. If the
+  // phone already belongs to someone, this never creates a second row for
+  // it — instead the existing record's name is overwritten with whatever
+  // was just typed (e.g. a corrected spelling), so the list stays current
+  // instead of silently keeping stale/duplicate-looking entries.
   let customerId: string | null = null;
   const customerPhone = data.customerPhone?.trim();
+  const customerName = data.customerName?.trim();
   if (customerPhone) {
     const existing = await prisma.customer.findUnique({ where: { phone: customerPhone } });
-    customerId = existing
-      ? existing.id
-      : (
-          await prisma.customer.create({
-            data: { name: data.customerName?.trim() || "Customer", phone: customerPhone },
-          })
-        ).id;
+    if (existing) {
+      customerId = existing.id;
+      if (customerName && customerName !== existing.name) {
+        await prisma.customer.update({ where: { id: existing.id }, data: { name: customerName } });
+      }
+    } else {
+      customerId = (
+        await prisma.customer.create({
+          data: { name: customerName || "Customer", phone: customerPhone },
+        })
+      ).id;
+    }
   }
 
   const wash = await prisma.washRecord.create({

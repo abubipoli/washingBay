@@ -13,6 +13,7 @@ type ServiceType = {
   defaultSoapPct: number;
 };
 type StaffOption = { id: string; name: string };
+type CustomerOption = { id: string; name: string; phone: string };
 
 /** The "Record Wash" trigger + pop-up modal for the Revenue Recording page.
  * Also opens itself automatically when linked to via `?action=new` (used by
@@ -20,10 +21,12 @@ type StaffOption = { id: string; name: string };
 export function RevenueRecordingArea({
   serviceTypes,
   staff,
+  customers,
   currency,
 }: {
   serviceTypes: ServiceType[];
   staff: StaffOption[];
+  customers: CustomerOption[];
   currency: string;
 }) {
   const router = useRouter();
@@ -52,6 +55,7 @@ export function RevenueRecordingArea({
         onClose={() => setOpen(false)}
         serviceTypes={serviceTypes}
         staff={staff}
+        customers={customers}
         currency={currency}
       />
     </>

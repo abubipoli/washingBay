@@ -45,8 +45,8 @@ export function ReportGenerator() {
       <div>
         <h3 className="text-headline-md font-headline-md">Generate a Report</h3>
         <p className="text-sm text-on-surface-variant mt-1">
-          Pick a date range, then open a report — it opens in a new tab styled for printing, so you can use your
-          browser's Print dialog to save it as a PDF or send it straight to a printer.
+          Pick a date range, then open a report — it's styled for printing, so you can use your browser's Print
+          dialog to save it as a PDF or send it straight to a printer.
         </p>
       </div>
 
@@ -93,8 +93,6 @@ export function ReportGenerator() {
           <a
             key={r.type}
             href={`/reports/print?from=${from}&to=${to}&type=${r.type}`}
-            target="_blank"
-            rel="noopener noreferrer"
             className="flex flex-col gap-1 p-4 border border-outline-variant rounded-lg hover:bg-surface-container-high hover:border-primary transition-colors"
           >
             <span className="flex items-center gap-2 text-on-surface font-medium">

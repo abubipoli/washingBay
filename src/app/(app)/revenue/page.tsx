@@ -96,9 +96,9 @@ export default async function RevenuePage({
               <button className="px-3 py-1.5 bg-surface-container-highest rounded-lg text-sm">Filter</button>
             </form>
           </div>
-          <div className="overflow-x-auto max-h-[720px]">
+          <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[980px]">
-              <thead className="sticky top-0">
+              <thead>
                 <tr className="bg-surface-container-low text-on-surface-variant font-label-caps text-label-caps">
                   <th className="py-3 px-4 font-medium">Vehicle / Time</th>
                   <th className="py-3 px-4 font-medium">Boy</th>

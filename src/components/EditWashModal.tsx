@@ -30,7 +30,7 @@ const VEHICLE_TYPES = [
   { value: "MOTORBIKE", label: "Motorbike" },
   { value: "VAN", label: "Van" },
   { value: "CAMBOO", label: "Camboo" },
-  { value: "MOTORKING", label: "MotorKing" },
+  { value: "MOTORKING", label: "Tricycle/Motorking" },
   { value: "OTHER", label: "Other" },
 ];
 

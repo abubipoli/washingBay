@@ -14,7 +14,7 @@ export const createWashSchema = z
       .coerce.date()
       .refine((d) => d.getTime() <= Date.now() + 5 * 60 * 1000, "Date can't be in the future")
       .optional(),
-    vehicleType: z.enum(["CAR", "SUV", "TRUCK", "BUS", "MOTORBIKE", "VAN", "OTHER"]),
+    vehicleType: z.enum(["CAR", "SUV", "TRUCK", "BUS", "MOTORBIKE", "VAN", "CAMBOO", "MOTORKING", "OTHER"]),
     serviceTypeId: z.string().cuid().optional().nullable(),
     serviceLabel: z.string().trim().min(2, "Service name is required").max(80),
     staffId: z.string().cuid("Select the washing boy who did the job"),

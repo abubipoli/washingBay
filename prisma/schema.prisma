@@ -27,6 +27,8 @@ enum VehicleType {
   BUS
   MOTORBIKE
   VAN
+  CAMBOO
+  MOTORKING
   OTHER
 }
 

@@ -29,6 +29,8 @@ const VEHICLE_TYPES = [
   { value: "BUS", label: "Bus" },
   { value: "MOTORBIKE", label: "Motorbike" },
   { value: "VAN", label: "Van" },
+  { value: "CAMBOO", label: "Camboo" },
+  { value: "MOTORKING", label: "MotorKing" },
   { value: "OTHER", label: "Other" },
 ];
 

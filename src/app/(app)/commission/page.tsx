@@ -113,6 +113,12 @@ export default async function DailyCommissionPage({
       )}
 
       <DailyCommissionBoard
+        // Keyed by the day being viewed so switching dates remounts the
+        // board fresh (it otherwise deliberately keeps its own state across
+        // background refreshes so a "Paid" stamp survives router.refresh()
+        // — without this key that same behavior meant changing the date
+        // silently kept showing the previous day's data until a hard reload).
+        key={isoDay(day)}
         initialGroups={initialGroups}
         currency={currency}
         periodStart={from.toISOString()}

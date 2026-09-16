@@ -23,6 +23,9 @@ const PRESETS = [
   { label: "Today", from: () => today(), to: () => today() },
   { label: "This Week", from: () => startOfWeek(today()), to: () => today() },
   { label: "This Month", from: () => startOfMonth(today()), to: () => today() },
+  // A fixed, far-past date rather than "the earliest wash on record" — simple,
+  // and functionally identical since nothing existed before this app did.
+  { label: "All Time", from: () => new Date(2020, 0, 1), to: () => today() },
 ];
 
 const REPORT_TYPES = [
@@ -36,9 +39,15 @@ const REPORT_TYPES = [
   { type: "washes", label: "Wash Report", description: "The full list of wash records in the period." },
 ] as const;
 
+function daySpan(from: string, to: string): number {
+  const ms = new Date(`${to}T00:00:00`).getTime() - new Date(`${from}T00:00:00`).getTime();
+  return Math.max(1, Math.round(ms / 86_400_000) + 1);
+}
+
 export function ReportGenerator() {
   const [from, setFrom] = useState(isoDate(startOfMonth(today())));
   const [to, setTo] = useState(isoDate(today()));
+  const span = daySpan(from, to);
 
   return (
     <div className="bg-surface-container-lowest rounded-xl shadow-level-1 p-card-padding flex flex-col gap-4">
@@ -87,6 +96,11 @@ export function ReportGenerator() {
           />
         </div>
       </div>
+
+      <p className="text-xs text-on-surface-variant -mt-2">
+        {span === 1 ? "This covers just 1 day" : `This covers ${span} days`} — widen the dates above (or use
+        &ldquo;All Time&rdquo;) if a report looks like it's missing records.
+      </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {REPORT_TYPES.map((r) => (

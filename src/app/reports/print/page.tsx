@@ -85,12 +85,21 @@ async function SummarySection({ from, to, currency }: { from: Date; to: Date; cu
   return (
     <>
       <h2 className="text-headline-md font-headline-md mb-3">Summary</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-        <SummaryStat label="Total Revenue" value={formatMoney(summary.revenue, currency)} />
+      <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+        <SummaryStat label="Total Revenue" value={formatMoney(summary.revenue, currency)} highlight />
         <SummaryStat label="Washes Recorded" value={String(summary.washCount)} />
+      </div>
+
+      <p className="text-xs text-on-surface-variant mb-2">
+        Split of the total revenue above — Business + Staff + Soap always add up to it:
+      </p>
+      <div className="grid grid-cols-3 gap-4 text-sm mb-4">
         <SummaryStat label="Business Cut" value={formatMoney(summary.businessCut, currency)} />
         <SummaryStat label="Staff Payouts" value={formatMoney(summary.staffPayoutsDue, currency)} />
         <SummaryStat label="Soap Allocated" value={formatMoney(summary.soapAllocated, currency)} />
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
         <SummaryStat label="Expenses" value={formatMoney(summary.expenses, currency)} />
         <SummaryStat label="Net Profit" value={formatMoney(summary.netProfit, currency)} highlight />
         <SummaryStat label="Margin" value={`${summary.margin.toFixed(1)}%`} />
